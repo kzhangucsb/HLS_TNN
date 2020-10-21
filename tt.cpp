@@ -23,9 +23,9 @@ inline int sub2ind4(
 }
 
 void tensor_contraction_raw(
-    TYPE_DATA* array_in,
-    TYPE_WEIGHT* array_weight,
-    TYPE_DATA* array_out,
+    TYPE_DATA array_in[78400],
+    TYPE_WEIGHT array_weight[10000],
+    TYPE_DATA array_out[78400],
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
@@ -59,16 +59,27 @@ void tensor_contraction_raw(
 }
 
 void tensor_train_forward(
-    TYPE_DATA* array_in,
-    TYPE_WEIGHT** weight,
-    TYPE_DATA* bias,
-    TYPE_DATA* array_out,
-    TYPE_DATA** tmp,
-    int* input_shape,
-    int* output_shape,
-    int* rank,
-    int dim
+    TYPE_DATA array_in[87400],
+    TYPE_WEIGHT weight[102400],
+    TYPE_DATA bias[102400],
+    TYPE_DATA array_out[1000],
+    TYPE_DATA tmp[4800000],
+    int input_shape[4],
+    int output_shape[4],
+    int rank[4],
+    int dim,
+	int weight_offset,
+	int tmp_offset
 ){
+#pragma HLS array_map variable=tmp instance=DRAM
+#pragma HLS array_map variable=array_out instance=DRAM
+#pragma HLS array_map variable=array_in instance=DRAM
+#pragma HLS ARRAY_MAP variable=input_shape horizontal
+#pragma HLS INTERFACE m_axi depth=4800000 port=tmp
+#pragma HLS INTERFACE m_axi depth=1000 port=array_out offset=slave
+#pragma HLS INTERFACE m_axi depth=102400 port=bias
+#pragma HLS INTERFACE m_axi depth=102400 port=weight
+#pragma HLS INTERFACE m_axi depth=87400 port=array_in offset=slave
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -89,7 +100,7 @@ void tensor_train_forward(
             rank_right = 1;
         }
         else {
-            mul_array_in = tmp[dim_mut];
+            mul_array_in = tmp + dim_mut * tmp_offset;
             rank_right = rank[dim_mut];
         }
         if (dim_mut == 0) {
@@ -97,12 +108,12 @@ void tensor_train_forward(
             rank_left = 1;
         }
         else {
-            mul_array_out = tmp[dim_mut - 1];
+            mul_array_out = tmp + (dim_mut - 1) * tmp_offset;
             rank_left = rank[dim_mut - 1];
         }
         tensor_contraction_raw(
             mul_array_in,
-            weight[dim_mut],
+            weight + dim_mut * weight_offset,
             mul_array_out,
             in_shape_0,
             input_shape[dim_mut] * rank_right,

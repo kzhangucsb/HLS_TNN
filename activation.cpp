@@ -5,7 +5,7 @@ void relu_inplace(
     int shape
 ){
     for (int i = 0; i < shape; i++) {
-        data[i] = data[i] > 0 ? data[i] : 0;
+        data[i] = data[i] > TYPE_DATA(0) ? data[i] : TYPE_DATA(0);
     }
 }
 
