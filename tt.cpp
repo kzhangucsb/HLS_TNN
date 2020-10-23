@@ -59,24 +59,22 @@ void tensor_contraction_raw(
 }
 
 void tensor_train_forward(
-    TYPE_DATA array_in[87400],
+    TYPE_DATA array_list[4800000],
     TYPE_WEIGHT weight[102400],
     TYPE_DATA bias[102400],
-    TYPE_DATA array_out[1000],
-    TYPE_DATA tmp[4800000],
+    int array_in_offset,
+	int array_out_offset,
+	int tmp_offset,
     int input_shape[4],
     int output_shape[4],
     int rank[4],
     int dim,
 	int weight_offset,
-	int tmp_offset
+	int tmp_distance
 ){
-#pragma HLS array_map variable=tmp instance=DRAM
-#pragma HLS array_map variable=array_out instance=DRAM
-#pragma HLS array_map variable=array_in instance=DRAM
+
 #pragma HLS ARRAY_MAP variable=input_shape horizontal
-#pragma HLS INTERFACE m_axi depth=4800000 port=tmp
-#pragma HLS INTERFACE m_axi depth=1000 port=array_out offset=slave
+#pragma HLS INTERFACE m_axi depth=4800000 port=array_list offset=slave
 #pragma HLS INTERFACE m_axi depth=102400 port=bias
 #pragma HLS INTERFACE m_axi depth=102400 port=weight
 #pragma HLS INTERFACE m_axi depth=87400 port=array_in offset=slave
@@ -96,19 +94,19 @@ void tensor_train_forward(
         }
 
         if (dim_mut == dim - 1) {
-            mul_array_in = array_in;
+            mul_array_in = array_list + array_in_offset;
             rank_right = 1;
         }
         else {
-            mul_array_in = tmp + dim_mut * tmp_offset;
+            mul_array_in = array_list + tmp_offset + dim_mut * tmp_distance;
             rank_right = rank[dim_mut];
         }
         if (dim_mut == 0) {
-            mul_array_out = array_out;
+            mul_array_out = array_list + array_out_offset;;
             rank_left = 1;
         }
         else {
-            mul_array_out = tmp + (dim_mut - 1) * tmp_offset;
+            mul_array_out = array_list + tmp_offset + (dim_mut - 1) * tmp_distance;
             rank_left = rank[dim_mut - 1];
         }
         tensor_contraction_raw(
@@ -127,7 +125,7 @@ void tensor_train_forward(
         output_size *= output_shape[i];
     }
     for (int i = 0; i < output_size; i++) {
-        array_out[i] += bias[i];
+        array_list[array_out_offset + i] += bias[i];
     }
 }
 
