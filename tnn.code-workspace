@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.fragmentshader": "glsl",
+			"*.vertexshader": "glsl",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp"
+		}
+	}
+}
