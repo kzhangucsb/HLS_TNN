@@ -1,7 +1,13 @@
+#ifdef SYNTHESIS
 #include <ap_fixed.h>
 #define TYPE_WEIGHT ap_fixed<8, 0>
 #define TYPE_DATA ap_fixed<8, 0>
 #define TYPE_INTER ap_fixed<16, 0>
+#else
+#define TYPE_WEIGHT float
+#define TYPE_DATA float
+#define TYPE_INTER float
+#endif
 
 void tensor_contraction_raw(
     TYPE_DATA array_in[78400],

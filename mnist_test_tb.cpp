@@ -19,12 +19,12 @@ void mnist_forward(
 
     for (int i = 0; i < batchsize; i++) {
         tensor_train_forward(
-            data_input_output_buffer0,
+            data_input_output_buffer,
             weight[0],
             bias[0],
             i * 28*28,
             28*28*batchsize + i * 512,
-            28*28**batchsize + 512*batchsize + 10 * batchsize,
+            28*28*batchsize + 512*batchsize + 10 * batchsize,
             input_shape,
             hidden_shape0,
             rank0,
@@ -32,9 +32,9 @@ void mnist_forward(
 			8*8*20*20,
 			20*32*32
         );
-        relu_inplace(hidden, 512);
+        relu_inplace(data_input_output_buffer + 28*28*batchsize + i * 512, 512);
         tensor_train_forward(
-            hidden,
+            data_input_output_buffer,
             weight[1],
             bias[1],
             28*28*batchsize + i * 512,
@@ -89,15 +89,15 @@ int main(){
     load_file(weight[1], "weight4.bin", 32*2*20);
     load_file(weight[1] + 8*8*20*20, "weight5.bin", 16*5*20);
     load_file(bias[0], "bias0.bin", 512);
-    load_file(bias[1], "bias1.bin", 10)
+    load_file(bias[1], "bias1.bin", 10);
     load_file(data_input_output_buffer, "input.bin", 28*28*100);
 
-    mnist_forward(data, weight, bias, output);
+    mnist_forward(data_input_output_buffer, weight, bias, 100);
 
-    save_file(data_input_output_buffer+28*28*100+512*100, 10*100, 100);
+    save_file(data_input_output_buffer + 28*28*100 + 512*100, "output.bin", 10*100);
     delete[] weight[0];
-    delete[] weight[1]
+    delete[] weight[1];
     delete[] bias[0];
     delete[] bias[1];
-    deleta[] data_input_output_buffer;
+    delete[] data_input_output_buffer;
 }
