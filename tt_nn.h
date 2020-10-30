@@ -9,10 +9,12 @@
 #define TYPE_INTER float
 #endif
 
-void tensor_contraction_raw(
-    TYPE_DATA array_in[78400],
-    TYPE_WEIGHT array_weight[10000],
-    TYPE_DATA array_out[78400],
+#define PARALLEL_DEGREE 4
+
+void tensor_contraction_mid(
+    TYPE_DATA array_in[1073741824],
+    TYPE_WEIGHT array_weight[1048576],
+    TYPE_DATA array_out[1073741824],
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
@@ -20,10 +22,21 @@ void tensor_contraction_raw(
     int array_weight_size_2
 );
 
+void tensor_contraction_end(
+    TYPE_DATA array_in[1073741824],
+    TYPE_WEIGHT array_weight[1048576],
+    TYPE_DATA array_out[1073741824],
+    int array_in_size_0,
+    int array_in_size_1,
+    int array_in_size_2,
+    int array_in_size_3,
+    int array_weight_size_1
+);
+
 void tensor_train_forward(
-    TYPE_DATA array_list[4800000],
-    TYPE_WEIGHT weight[102400],
-    TYPE_DATA bias[102400],
+    TYPE_DATA array_list[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    TYPE_DATA bias[1048576],
     int array_in_offset,
 	int array_out_offset,
 	int tmp_offset,

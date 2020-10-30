@@ -1,9 +1,9 @@
 #include "tt_nn.h"
 
 void tensor_train_forward(
-    TYPE_DATA array_list[4800000],
-    TYPE_WEIGHT weight[102400],
-    TYPE_DATA bias[102400],
+    TYPE_DATA array_list[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    TYPE_DATA bias[1048576],
     int array_in_offset,
 	int array_out_offset,
 	int tmp_offset,
@@ -16,10 +16,9 @@ void tensor_train_forward(
 ){
 
 #pragma HLS ARRAY_MAP variable=input_shape horizontal
-#pragma HLS INTERFACE m_axi depth=4800000 port=array_list offset=slave
-#pragma HLS INTERFACE m_axi depth=102400 port=bias
-#pragma HLS INTERFACE m_axi depth=102400 port=weight
-#pragma HLS INTERFACE m_axi depth=87400 port=array_in offset=slave
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
+#pragma HLS INTERFACE m_axi depth=1048576 port=bias
+#pragma HLS INTERFACE m_axi depth=1048576 port=weight
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -51,16 +50,31 @@ void tensor_train_forward(
             mul_array_out = array_list + tmp_offset + (dim_mut - 1) * tmp_distance;
             rank_left = rank[dim_mut - 1];
         }
-        tensor_contraction_raw(
-            mul_array_in,
-            weight + dim_mut * weight_offset,
-            mul_array_out,
-            in_shape_0,
-            input_shape[dim_mut] * rank_right,
-            in_shape_2,
-            rank_left * output_shape[dim_mut],
-            1
-        );
+
+        if (dim_mut == dim - 1) {
+            tensor_contraction_end(
+                mul_array_in,
+                weight + dim_mut * weight_offset,
+                mul_array_out,
+                1, 
+                in_shape_0,
+                1, 
+                input_shape[dim_mut],
+                rank_left * output_shape[dim_mut]
+            );
+        }
+        else{
+            tensor_contraction_mid(
+                mul_array_in,
+                weight + dim_mut * weight_offset,
+                mul_array_out,
+                in_shape_0,
+                input_shape[dim_mut] * rank_right,
+                in_shape_2,
+                rank_left * output_shape[dim_mut],
+                1
+            );
+        }
     }
     int output_size = 1;
     for (int i = 0; i < dim; i++) {
