@@ -22,15 +22,15 @@ void tensor_contraction_mid(
     int array_weight_size_2
 );
 
-void tensor_contraction_end(
+void tensor_contraction_last(
     TYPE_DATA array_in[1073741824],
     TYPE_WEIGHT array_weight[1048576],
     TYPE_DATA array_out[1073741824],
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
-    int array_in_size_3,
-    int array_weight_size_1
+    int array_weight_size_0,
+    int array_weight_size_2
 );
 
 void tensor_train_forward(
