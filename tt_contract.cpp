@@ -10,6 +10,7 @@ inline int sub2ind3(
     int size1,
     int size2
 ){
+#pragma HLS INLINE
     return (ind0 * size1 + ind1) * size2 + ind2;
 }
 
@@ -22,10 +23,11 @@ inline int sub2ind4(
     int size2,
     int size3
 ){
+#pragma HLS INLINE
     return ((ind0 * size1 + ind1) * size2 + ind2) * size3 + ind3;
 }
 
-void tensor_contraction_mid(
+void tensor_cont_mid(
     TYPE_DATA array_in[1073741824],
     TYPE_WEIGHT array_weight[1048576],
     TYPE_DATA array_out[1073741824],
@@ -50,6 +52,7 @@ void tensor_contraction_mid(
         for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
             for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
                 for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
                     for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
                         res = 0;
                         for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
@@ -67,7 +70,7 @@ void tensor_contraction_mid(
     }
 }
 
-void tensor_contraction_last(
+void tensor_cont_last(
     TYPE_DATA array_in[1073741824],
     TYPE_WEIGHT array_weight[1048576],
     TYPE_DATA array_out[1073741824],
@@ -90,7 +93,9 @@ void tensor_contraction_last(
                 for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
                     res = 0;
                     for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+#pragma HLS PIPELINE
                         for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
+#pragma HLS UNROLL
                             int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2+i_in_o,  
                                 array_in_size_1, array_in_size_2);
                             int ind_w = sub2ind3(i_w_0, i_in_2+i_in_o, i_w_2, array_in_size_2, array_weight_size_2);
@@ -105,7 +110,7 @@ void tensor_contraction_last(
     }
 }
 
-void tensor_contraction_end_backward(
+void tensor_cont_end_backward(
     TYPE_DATA array_in[1073741824],
     TYPE_DATA array_weight[1048576],
     TYPE_DATA array_out[1073741824],
@@ -129,6 +134,7 @@ void tensor_contraction_end_backward(
                 for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
                     for (int i_in_3 = 0; i_in_3 < array_in_size_3; i_in_3 += PARALLEL_DEGREE) {
                         for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
+#pragma HLS UNROLL
                             int ind_in = sub2ind4(i_in_0, i_in_1, i_in_2, i_in_3+i_in_o, 
                                 array_in_size_1, array_in_size_2, array_in_size_3);
                             int ind_w = sub2ind3(i_in_0, i_w_1, i_in_3+i_in_o, array_weight_size_1, array_in_size_3);
