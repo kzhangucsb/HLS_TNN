@@ -368,7 +368,7 @@ void tensor_cont_last_wrapper(
     TYPE_DATA array_out[1073741824]
 ){
 #pragma HLS ARRAY_PARTITION variable=array_in cyclic factor=16
-#pragma HLS ARRAY_PARTITION variable=array_weight cyclic factor=16
+#pragma HLS ARRAY_PARTITION variable=array_weight cyclic factor=256
 #pragma HLS ARRAY_PARTITION variable=array_out cyclic factor=16
 	tensor_cont_last(
 		array_in,
@@ -378,6 +378,6 @@ void tensor_cont_last_wrapper(
 		16,
 		32,
 		16,
-		16
+		2
 	);
 }

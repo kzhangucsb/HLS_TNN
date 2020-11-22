@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "tt_nn.h"
-
+#include <fstream>
 
 
 void mnist_forward(

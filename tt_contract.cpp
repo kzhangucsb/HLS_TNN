@@ -86,12 +86,12 @@ void tensor_cont_last(
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
     #endif 
-    TYPE_INTER res;
+    //TYPE_INTER res;
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
         for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
             for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
                 for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-                    res = 0;
+                	TYPE_INTER res = 0;
                     for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
 #pragma HLS PIPELINE
                         for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
