@@ -137,10 +137,7 @@ void tensor_contraction_end_backward(
                     }
                 }
                 int ind_out = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
-<<<<<<< HEAD
-=======
                 assert (ind_out < 8*8*20*20);
->>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
                 array_out[ind_out] += res;
             }
         }

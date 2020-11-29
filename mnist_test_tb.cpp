@@ -2,8 +2,6 @@
 #include <assert.h>
 #include "tt_nn.h"
 
-<<<<<<< HEAD
-=======
 template<typename T>
 void load_file(T* data, const char* filename, int size) {
     float* buffer = new float[size];
@@ -28,7 +26,6 @@ void save_file(T* data, const char* filename, int size) {
     fclose(f);
 }
 
->>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
 /*********************************
  * data_input_output_buffer:
  * data_in | hidden | output | tmp (reused by sample)
@@ -83,113 +80,6 @@ void mnist_forward(
 			20*32*32
         );
     }
-<<<<<<< HEAD
-}
-
-void mnist_train(
-    TYPE_DATA* data_input_output_buffer,
-    TYPE_WEIGHT** weight,
-    TYPE_DATA** bias,
-    TYPE_DATA** weight_grad,
-    TYPE_DATA** bias_grad,
-    unsigned char* label,
-    int batchsize
-){
-    
-    int input_shape[] = {7, 4, 7, 4};
-    int hidden_shape0[] = {4, 8, 4, 4};
-    int rank0[] = {16, 16, 16};
-    int hidden_shape1[] = {32, 16};
-    
-    int rank1[] = {16};
-    int output_shape[] = {4, 4};
-
-    for (int i = 0; i < 1; i++) {
-        tensor_train_forward(
-            data_input_output_buffer,
-            weight[0],
-            bias[0],
-            i * 28*28,
-            28*28*batchsize + i * 512,
-            28*28*batchsize + 512*batchsize + 16 * batchsize,
-            input_shape,
-            hidden_shape0,
-            rank0,
-            4,
-			8*8*20*20,
-			20*32*32
-        );
-        relu_inplace(data_input_output_buffer + 28*28*batchsize + i * 512, 512);
-        tensor_train_forward(
-            data_input_output_buffer,
-            weight[1],
-            bias[1],
-            28*28*batchsize + i * 512,
-            28*28*batchsize + 512*batchsize + i * 16,
-            28*28*batchsize + 512*batchsize + 16 * batchsize,
-            hidden_shape1,
-            output_shape,
-            rank1,
-            2,
-			8*8*20*20,
-			20*32*32
-        );
-        // backward
-        softmax_ce_grad(
-            data_input_output_buffer, 
-            label[i], 
-            28*28*batchsize + 512*batchsize + i * 16,
-            28*28*batchsize + 512*batchsize + 16 * batchsize,
-            16
-        );
-        tensor_train_backward(
-            data_input_output_buffer,
-            weight[1],
-            weight_grad[1],
-            28*28*batchsize + 512 * i,
-            28*28*batchsize + 512*batchsize + 16 * batchsize,
-            28*28*batchsize + 512*batchsize + 16 * batchsize + 16,
-            28*28*batchsize + 512*batchsize + 16 * batchsize + 16 + 512,
-            hidden_shape1,
-            output_shape,
-            rank1,
-            2,
-            8*8*20*20,
-			20*20*20*32*32
-        );
-        
-        relu_backward_inplace(
-            data_input_output_buffer,
-            28*28*batchsize + i * 512,
-            28*28*batchsize + 512*batchsize + 16 * batchsize + 16,
-            512
-        );
-        tensor_train_backward(
-            data_input_output_buffer,
-            weight[0],
-            weight_grad[0],
-            28*28*i,
-            28*28*batchsize + 512*batchsize + 16 * batchsize + 16,
-            28*28*batchsize + 512*batchsize + 16 * batchsize + 16 + 512 + 20*20*20*32*32*4,
-            28*28*batchsize + 512*batchsize + 16 * batchsize + 16 + 512,
-            input_shape,
-            hidden_shape1,
-            rank0,
-            4,
-            8*8*20*20,
-			20*20*20*32*32
-        );
-        for (int i = 0; i < 512; i++) {
-            bias_grad[0][i] += data_input_output_buffer[28*28*batchsize + 
-                512*batchsize + 16*batchsize + 16 + i];
-        }
-        for (int i = 0; i < 16; i++) {
-            bias_grad[1][i] += data_input_output_buffer[28*28*batchsize + 
-                512*batchsize + 16*batchsize+ i];
-        }
-    }
-=======
->>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
 }
 
 void mnist_train(
@@ -335,11 +225,8 @@ int main(){
     save_file(weight_grad[0] + 8*8*20*20*3, "weight_grad3.bin", 16*4*4);
     save_file(weight_grad[1], "weight_grad4.bin", 32*4*16);
     save_file(weight_grad[1] + 8*8*20*20, "weight_grad5.bin", 16*4*16);
-<<<<<<< HEAD
-=======
     save_file(bias_grad[0], "bias_grad0.bin", 512);
     save_file(bias_grad[1], "bias_grad1.bin", 16);
->>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
     delete[] weight[0];
     delete[] weight[1];
     delete[] bias[0];
