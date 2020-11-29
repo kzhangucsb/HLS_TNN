@@ -146,3 +146,42 @@ void tensor_contraction_end_backward(
         }
     }
 }
+
+void tensor_contraction_head_backward(
+    TYPE_DATA array_in[1073741824],
+    TYPE_DATA array_weight[1048576],
+    TYPE_DATA array_out[1073741824],
+    int array_in_size_0,
+    int array_in_size_1,
+    int array_in_size_2,
+    int array_weight_size_1
+){
+    /* tensor contraction on the first and last dimension
+    ABCxAE->BEC
+    */
+    #ifndef SYNTHESIS
+    assert (array_in_size_2 % PARALLEL_DEGREE == 0);
+    #endif 
+    TYPE_INTER res[PARALLEL_DEGREE];
+    for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+        for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
+            for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1++) {
+                for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+                    res[i_in_o] = 0;
+                }
+                for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+                    int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, 
+                        array_in_size_1, array_in_size_2);
+                    int ind_w = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
+                    for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+                        res[i_in_o] += array_in[ind_in+i_in_o] * array_weight[ind_w];
+                    }
+                }
+                int ind_out = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
+                for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+                    array_out[ind_out + i_in_o] += res[i_in_o];
+                }
+            }
+        }
+    }
+}
