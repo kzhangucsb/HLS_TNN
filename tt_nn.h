@@ -4,12 +4,13 @@
 #define TYPE_DATA ap_fixed<8, 0>
 #define TYPE_INTER ap_fixed<16, 0>
 #else
-#define TYPE_WEIGHT float
-#define TYPE_DATA float
-#define TYPE_INTER float
+#include <math.h>
+typedef float TYPE_WEIGHT ;
+typedef float TYPE_DATA;
+typedef float TYPE_INTER;
 #endif
 
-#define PARALLEL_DEGREE 4
+#define PARALLEL_DEGREE 1
 
 void tensor_contraction_mid(
     TYPE_DATA array_in[1073741824],
@@ -59,7 +60,68 @@ void tensor_contraction_end_backward(
     int array_weight_size_1
 );
 
+void tensor_train_input_grad(
+    TYPE_DATA array_list[1073741824],
+    TYPE_WEIGHT weight[1048576],
+	int grad_out_offset,
+    int grad_in_offset,
+	int tmp_offset,
+    int input_shape[4],
+    int output_shape[4],
+    int rank[4],
+    int dim,
+	int weight_offset,
+	int tmp_distance
+);
+
+void tensor_train_weight_grad(
+    TYPE_DATA array_list[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    TYPE_DATA weight_grad[1048576],
+    int dim_grad,
+    int array_in_offset,
+    int grad_out_offset,
+	int tmp_offset,
+    int input_shape[4],
+    int output_shape[4],
+    int rank[4],
+    int dim,
+	int weight_offset,
+	int tmp_distance
+);
+
+void tensor_train_backward(
+    TYPE_DATA array_list[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    TYPE_DATA weight_grad[1048576],
+    int array_in_offset,
+    int grad_out_offset,
+    int grad_in_offset,
+	int tmp_offset,
+    int input_shape[4],
+    int output_shape[4],
+    int rank[4],
+    int dim,
+	int weight_offset,
+	int tmp_distance
+);
+
 void relu_inplace(
     TYPE_DATA* data,
     int shape
+);
+
+void relu_backward_inplace(
+    TYPE_DATA* data,
+    int data_offset,
+    int grad_offset,
+    int shape
+);
+
+void softmax_ce_grad(
+    TYPE_DATA* data,
+    unsigned char label,
+    int out_offset,
+    int grad_offset,
+    unsigned char num_class
 );

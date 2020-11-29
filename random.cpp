@@ -1,3 +1,5 @@
+#include "tt_nn.h"
+#ifdef SYNTHESIS
 #include <ap_fixed.h>
 #define RINT_TYPE ap_uint<32>
 
@@ -19,3 +21,4 @@ RINT_TYPE pseudo_random() {
     return lfsr;
 
 }
+#endif
