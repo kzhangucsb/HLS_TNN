@@ -47,22 +47,30 @@ void tensor_cont_mid(
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
     #endif 
-    TYPE_INTER res;
+    TYPE_INTER res[PARALLEL_DEGREE];
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
         for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
             for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
-                for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
+#pragma HLS dataflow
+					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-                    for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-                        res = 0;
-                        for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
-                            int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2+i_in_o, array_in_size_1, array_in_size_2);
-                            int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
-                            res += array_in[ind_in] * array_weight[ind_w];
-                        }
-                        int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2+i_in_o,
-                            array_weight_size_0, array_weight_size_2, array_in_size_2);
-                        array_out[ind_out] = res;
+                        res[i_in_o] = 0;
+					}
+					for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
+#pragma HLS pipeline
+						int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2);
+						int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
+						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
+							res[i_in_o] += array_in[ind_in + i_in_o] * array_weight[ind_w];
+						}
+					}
+					int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
+						array_weight_size_0, array_weight_size_2, array_in_size_2);
+					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
+                        array_out[ind_out+i_in_o] = res[i_in_o];
                     }
                 }
             }

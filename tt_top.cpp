@@ -362,6 +362,32 @@ void tensor_train_forward_wrapper(
 	);
 }
 
+//inline int sub2ind3(
+//    int ind0,
+//    int ind1,
+//    int ind2,
+//    int size1,
+//    int size2
+//){
+//#pragma HLS INLINE
+//    return (ind0 * size1 + ind1) * size2 + ind2;
+//}
+
+#define sub2ind3(ind0, ind1, ind2, size1, size2) ((ind0 * size1 + ind1) * size2 + ind2)
+
+inline int sub2ind4(
+    int ind0,
+    int ind1,
+    int ind2,
+    int ind3,
+    int size1,
+    int size2,
+    int size3
+){
+#pragma HLS INLINE
+    return ((ind0 * size1 + ind1) * size2 + ind2) * size3 + ind3;
+}
+
 void tensor_cont_last_wrapper(
     TYPE_DATA array_in[1073741824],
     TYPE_WEIGHT array_weight[1048576],
@@ -370,14 +396,66 @@ void tensor_cont_last_wrapper(
 #pragma HLS ARRAY_PARTITION variable=array_in cyclic factor=16
 #pragma HLS ARRAY_PARTITION variable=array_weight cyclic factor=256
 #pragma HLS ARRAY_PARTITION variable=array_out cyclic factor=16
-	tensor_cont_last(
+
+//	int array_in_size_0 = 2;
+//	int array_in_size_1 = 2;
+//	int array_in_size_2 = 32;
+//	int array_weight_size_0 = 4;
+//	int array_weight_size_2 = 4;
+#define array_in_size_0 2
+#define array_in_size_1 2
+#define array_in_size_2 32
+#define array_weight_size_0 4
+#define array_weight_size_2 1
+
+	for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+		for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+			for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
+				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
+					TYPE_INTER res = 0;
+					for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+#pragma HLS pipeline
+						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
+#pragma HLS UNROLL
+							int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2+i_in_o,
+								array_in_size_1, array_in_size_2);
+							int ind_w = sub2ind3(i_w_0, i_in_2+i_in_o, i_w_2, array_in_size_2, array_weight_size_2);
+							res += array_in[ind_in] * array_weight[ind_w];
+						}
+					}
+					int ind_out = sub2ind4(i_in_0, i_in_1, i_w_0, i_w_2, array_in_size_1, array_weight_size_0, array_weight_size_2);
+					array_out[ind_out] = res;
+				}
+			}
+		}
+	}
+}//	tensor_cont_last(
+//		array_in,
+//		array_weight,
+//		array_out,
+//		32,
+//		16,
+//		32,
+//		16,
+//		2
+//	);
+
+void tensor_cont_mid_wrapper(
+	TYPE_DATA array_in[1073741824],
+	TYPE_WEIGHT array_weight[1048576],
+	TYPE_DATA array_out[1073741824]
+) {
+#pragma HLS ARRAY_PARTITION variable=array_in cyclic factor=16
+#pragma HLS ARRAY_PARTITION variable=array_weight cyclic factor=16
+#pragma HLS ARRAY_PARTITION variable=array_out cyclic factor=16
+	tensor_cont_mid(
 		array_in,
 		array_weight,
 		array_out,
+		8,
+		8,
 		32,
-		16,
-		32,
-		16,
-		2
+		4,
+		4
 	);
 }
