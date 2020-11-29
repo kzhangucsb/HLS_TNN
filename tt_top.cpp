@@ -1,4 +1,5 @@
 #include "tt_nn.h"
+#include <assert.h>
 
 void tensor_train_forward(
     TYPE_DATA array_list[1073741824],
@@ -137,6 +138,7 @@ void tensor_train_input_grad(
         }
 
         if (dim_mut == dim - 1) {
+            assert(rank_right == 1);
             tensor_contraction_last(
                 mul_array_in,
                 weight + dim_mut * weight_offset,
@@ -145,7 +147,7 @@ void tensor_train_input_grad(
                 in_shape_0,
                 rank_left * output_shape[dim_mut],
                 1,
-                input_shape[dim_mut] * rank_right
+                input_shape[dim_mut]
             );
         }
         else{
@@ -154,10 +156,10 @@ void tensor_train_input_grad(
                 weight + dim_mut * weight_offset,
                 mul_array_out,
                 in_shape_0,
-                rank_left * input_shape[dim_mut],
+                rank_left * output_shape[dim_mut],
                 in_shape_2,
                 1,
-                output_shape[dim_mut] * rank_right
+                input_shape[dim_mut] * rank_right
             );
         }
     }
@@ -200,6 +202,7 @@ void tensor_train_weight_grad(
             }
             
             //rank_left = rank[dim_mut - 1];
+<<<<<<< HEAD
             mul_array_out = array_list + tmp_offset + (dim_mut - 1) * tmp_distance;
             // if (dim_mut == dim - 1) {
             //     mul_array_in = array_list + array_in_offset;
@@ -209,6 +212,17 @@ void tensor_train_weight_grad(
             //     mul_array_in = array_list + tmp_offset + (dim_mut - 2) * tmp_distance;
             //     rank_right = rank[dim_mut];
             // }
+=======
+            if (dim_mut == dim - 1) {
+                mul_array_in = array_list + array_in_offset;
+                // rank_right = 1;
+            }
+            else {
+                mul_array_in = array_list + tmp_offset + dim_mut * tmp_distance;
+                // rank_right = rank[dim_mut];
+            }
+            mul_array_out = array_list + tmp_offset + (dim_mut - 1) * tmp_distance;
+>>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
             if (dim_mut == dim - 1) {
                 tensor_contraction_last(
                     array_list + array_in_offset,
@@ -298,9 +312,9 @@ void tensor_train_weight_grad(
                     mul_array_out,
                     1,
                     in_shape_0,
-                    rank_left * input_shape[dim_mut],
+                    rank_left * output_shape[dim_mut],
                     w_shape_0,
-                    output_shape[dim_mut] * rank_right
+                    input_shape[dim_mut] * rank_right
                 );
             
             }
@@ -310,10 +324,10 @@ void tensor_train_weight_grad(
                     weight + dim_mut * weight_offset,
                     mul_array_out,
                     in_shape_0,
-                    rank_left * input_shape[dim_mut],
+                    rank_left * output_shape[dim_mut],
                     in_shape_2,
                     w_shape_0,
-                    output_shape[dim_mut] * rank_right
+                    input_shape[dim_mut] * rank_right
                 );
             }
         } // for (int dim_mut = dim_grad + 1; dim_mut < dim; dim_mut++)
@@ -325,13 +339,27 @@ void tensor_train_weight_grad(
         for (int i = dim_grad + 1; i < dim; i++) {
             in_shape_3 *= input_shape[i];
         }
+<<<<<<< HEAD
+=======
+        int rank_right;
+        if (dim_grad == dim - 1) {
+            rank_right = 1;
+        }
+        else {
+            rank_right = rank[dim_grad];
+        }
+>>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
         tensor_contraction_end_backward(
             array_list + tmp_offset + (dim - 2) * tmp_distance,
             array_list + array_in_offset,
             weight_grad + dim_grad * weight_offset,
             in_shape_0,
             rank[dim_grad - 1] * output_shape[dim_grad],
+<<<<<<< HEAD
             rank[dim_grad],
+=======
+            rank_right,
+>>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
             in_shape_3,
             input_shape[dim_grad]
         );
@@ -367,7 +395,11 @@ void tensor_train_backward(
         weight_offset,
         tmp_distance
     );
+<<<<<<< HEAD
     for (int dim_grad = dim; dim_grad >= 0; dim_grad--) {
+=======
+    for (int dim_grad = dim - 1; dim_grad >= 0; dim_grad--) {
+>>>>>>> 1071ea4ced66b1903f933d9480f07edeaec18001
         tensor_train_weight_grad(
             array_list,
             weight,
