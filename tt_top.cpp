@@ -16,7 +16,6 @@ void tensor_train_forward(
 	int tmp_distance
 ){
 #pragma HLS ALLOCATION instances=1 function
-
 #pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
 #pragma HLS INTERFACE m_axi depth=1048576 port=bias
@@ -101,8 +100,6 @@ void tensor_train_input_grad(
 	int weight_offset,
 	int tmp_distance
 ){
-
-#pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight
     TYPE_DATA* mul_array_in;
@@ -179,10 +176,8 @@ void tensor_train_weight_grad(
 	int weight_offset,
 	int tmp_distance
 ){
-
-#pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
-#pragma HLS INTERFACE depth=1048576 port=weight
+#pragma HLS INTERFACE ap_memory depth=1048576 port=weight
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -369,6 +364,9 @@ void tensor_train_backward(
 	int weight_offset,
 	int tmp_distance
 ){
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
+#pragma HLS INTERFACE ap_memory depth=1048576 port=weight
+#pragma HLS INTERFACE ap_memory depth=1048576 port=weight_grad
     tensor_train_input_grad(
         array_list,
         weight,
@@ -400,3 +398,4 @@ void tensor_train_backward(
         );
     }
 }
+

@@ -1,6 +1,8 @@
-
+#define SYNTHESIS
 #ifdef SYNTHESIS
 #include <ap_fixed.h>
+#include <hls_math.h>
+#define exp hls::exp
 #define TYPE_WEIGHT ap_fixed<8, 0>
 #define TYPE_DATA ap_fixed<8, 0>
 #define TYPE_INTER ap_fixed<16, 0>

@@ -44,6 +44,8 @@ void tensor_cont_mid(
     * array_out: size(array_in_size_0*array_weight_size_0*array_weight_size_2*array_in_size_2)
     * All arrays are in C order
     */
+//#pragma HLS stable variable=array_in
+//#pragma HLS stable variable=array_out
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
     #endif 
@@ -52,7 +54,7 @@ void tensor_cont_mid(
         for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
             for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
 				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-#pragma HLS dataflow
+#pragma HLS pipeline
 					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
                         res[i_in_o] = 0;
@@ -152,7 +154,7 @@ void tensor_cont_end_backward(
                     }
                 }
                 int ind_out = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
-                assert (ind_out < 8*8*20*20);
+                //assert (ind_out < 8*8*20*20);
                 array_out[ind_out] += res;
             }
         }
