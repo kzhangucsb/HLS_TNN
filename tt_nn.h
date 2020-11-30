@@ -1,3 +1,4 @@
+
 #ifdef SYNTHESIS
 #include <ap_fixed.h>
 #define TYPE_WEIGHT ap_fixed<8, 0>
@@ -10,9 +11,9 @@ typedef float TYPE_DATA;
 typedef float TYPE_INTER;
 #endif
 
-#define PARALLEL_DEGREE 1
+#define PARALLEL_DEGREE 4
 
-void tensor_contraction_mid(
+void tensor_cont_mid(
     TYPE_DATA array_in[1073741824],
     TYPE_WEIGHT array_weight[1048576],
     TYPE_DATA array_out[1073741824],
@@ -23,7 +24,7 @@ void tensor_contraction_mid(
     int array_weight_size_2
 );
 
-void tensor_contraction_last(
+void tensor_cont_last(
     TYPE_DATA array_in[1073741824],
     TYPE_WEIGHT array_weight[1048576],
     TYPE_DATA array_out[1073741824],
@@ -49,7 +50,7 @@ void tensor_train_forward(
 	int tmp_distance
 );
 
-void tensor_contraction_end_backward(
+void tensor_cont_end_backward(
     TYPE_DATA array_in[1073741824],
     TYPE_DATA array_weight[1048576],
     TYPE_DATA array_out[1073741824],
@@ -57,6 +58,15 @@ void tensor_contraction_end_backward(
     int array_in_size_1,
     int array_in_size_2,
     int array_in_size_3,
+    int array_weight_size_1
+);
+
+void tensor_cont_head_backward(
+    TYPE_DATA array_in[1073741824],
+    TYPE_DATA array_weight[1048576],
+    TYPE_DATA array_out[1073741824],
+    int array_in_size_0,
+    int array_in_size_1,
     int array_weight_size_1
 );
 

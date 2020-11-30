@@ -15,11 +15,12 @@ void tensor_train_forward(
 	int weight_offset,
 	int tmp_distance
 ){
+#pragma HLS ALLOCATION instances=1 function
 
 #pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
 #pragma HLS INTERFACE m_axi depth=1048576 port=bias
-#pragma HLS INTERFACE m_axi depth=1048576 port=weight
+#pragma HLS INTERFACE ap_memory depth=1048576 port=weight
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -53,7 +54,7 @@ void tensor_train_forward(
         }
 
         if (dim_mut == dim - 1) {
-            tensor_contraction_last(
+            tensor_cont_last(
                 mul_array_in,
                 weight + dim_mut * weight_offset,
                 mul_array_out,
@@ -65,7 +66,7 @@ void tensor_train_forward(
             );
         }
         else{
-            tensor_contraction_mid(
+            tensor_cont_mid(
                 mul_array_in,
                 weight + dim_mut * weight_offset,
                 mul_array_out,
@@ -103,8 +104,7 @@ void tensor_train_input_grad(
 
 #pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
-#pragma HLS INTERFACE m_axi depth=1048576 port=bias
-#pragma HLS INTERFACE m_axi depth=1048576 port=weight
+#pragma HLS INTERFACE ap_memory depth=1048576 port=weight
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -138,8 +138,7 @@ void tensor_train_input_grad(
         }
 
         if (dim_mut == dim - 1) {
-            assert(rank_right == 1);
-            tensor_contraction_last(
+            tensor_cont_last(
                 mul_array_in,
                 weight + dim_mut * weight_offset,
                 mul_array_out,
@@ -151,7 +150,7 @@ void tensor_train_input_grad(
             );
         }
         else{
-            tensor_contraction_mid(
+            tensor_cont_mid(
                 mul_array_in,
                 weight + dim_mut * weight_offset,
                 mul_array_out,
@@ -183,8 +182,7 @@ void tensor_train_weight_grad(
 
 #pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
-#pragma HLS INTERFACE m_axi depth=1048576 port=bias
-#pragma HLS INTERFACE m_axi depth=1048576 port=weight
+#pragma HLS INTERFACE depth=1048576 port=weight
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -206,8 +204,8 @@ void tensor_train_weight_grad(
             mul_array_out = array_list + tmp_offset + (dim_mut - 1) * tmp_distance;
             
 
-            if (dim_mut == dim - 1) {
-                tensor_contraction_last(
+            if (dim_mut == dim - 1) {    
+                tensor_cont_last(
                     array_list + array_in_offset,
                     weight + dim_mut * weight_offset,
                     mul_array_out,
@@ -221,7 +219,7 @@ void tensor_train_weight_grad(
             else{
                 //mul_array_in = array_list + tmp_offset + dim_mut * tmp_distance;
                 //rank_right = rank[dim_mut];
-                tensor_contraction_mid(
+                tensor_cont_mid(
                     array_list + tmp_offset + dim_mut * tmp_distance,
                     weight + dim_mut * weight_offset,
                     mul_array_out,
@@ -237,7 +235,7 @@ void tensor_train_weight_grad(
         for (int i = 1; i < dim; i++) {
             in_shape_3 *= output_shape[i];
         }
-        tensor_contraction_end_backward(
+        tensor_cont_end_backward(
             array_list + tmp_offset,
             array_list + grad_out_offset,
             weight_grad,
@@ -289,7 +287,7 @@ void tensor_train_weight_grad(
             }
 
             if (dim_mut == dim - 1) {
-                tensor_contraction_last(
+                tensor_cont_last(
                     mul_array_in,
                     weight + dim_mut * weight_offset,
                     mul_array_out,
@@ -302,7 +300,7 @@ void tensor_train_weight_grad(
             
             }
             else{
-                tensor_contraction_mid(
+                tensor_cont_mid(
                     mul_array_in,
                     weight + dim_mut * weight_offset,
                     mul_array_out,
@@ -329,16 +327,29 @@ void tensor_train_weight_grad(
         else {
             rank_right = rank[dim_grad];
         }
-        tensor_contraction_end_backward(
-            array_list + tmp_offset + (dim - 2) * tmp_distance,
-            array_list + array_in_offset,
-            weight_grad + dim_grad * weight_offset,
-            in_shape_0,
-            rank[dim_grad - 1] * output_shape[dim_grad],
-            rank_right,
-            in_shape_3,
-            input_shape[dim_grad]
-        );
+        if (dim_grad == dim - 1) {
+            tensor_cont_head_backward(
+                array_list + tmp_offset + (dim - 2) * tmp_distance,
+                array_list + array_in_offset,
+                weight_grad + dim_grad * weight_offset,
+                in_shape_0,
+                rank[dim_grad - 1] * output_shape[dim_grad],
+                input_shape[dim_grad]
+            );
+
+        }
+        else{
+            tensor_cont_end_backward(
+                array_list + tmp_offset + (dim - 2) * tmp_distance,
+                array_list + array_in_offset,
+                weight_grad + dim_grad * weight_offset,
+                in_shape_0,
+                rank[dim_grad - 1] * output_shape[dim_grad],
+                rank_right,
+                in_shape_3,
+                input_shape[dim_grad]
+            );
+        }
     }// dim_grad > 0
     
 }
