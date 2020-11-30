@@ -118,6 +118,7 @@ void tensor_cont_last(
     }
 }
 
+
 void tensor_cont_end_backward(
     TYPE_DATA array_in[1073741824],
     TYPE_DATA array_weight[1048576],
