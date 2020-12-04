@@ -2,6 +2,17 @@
 #include <assert.h>
 #include "tt_nn.h"
 
+inline int sub2ind3(
+    int ind0,
+    int ind1,
+    int ind2,
+    int size1,
+    int size2
+){
+#pragma HLS INLINE
+    return (ind0 * size1 + ind1) * size2 + ind2;
+}
+
 template<typename T>
 void load_file(T* data, const char* filename, int size) {
     float* buffer = new float[size];
@@ -100,6 +111,26 @@ void mnist_train(
     int rank1[] = {16};
     int output_shape[] = {4, 4};
 
+    for (int i_0 = 0; i_0 < rank0[2]; i_0++) {
+        for (int i_1 = 0; i_1 < hidden_shape0[3]; i_1++) {
+            for (int i_2 = 0; i_2 < input_shape[3]; i_2++) {
+                int ind_i = sub2ind3(i_0, i_1, i_2, hidden_shape0[3], input_shape[3]);
+                int ind_o = sub2ind3(i_0, i_2, i_1, input_shape[3], hidden_shape0[3]);
+                weight[0][4 * 8*8*20*20 + ind_o] = weight[0][3 * 8*8*20*20 + ind_i];
+            }
+        }
+    }
+
+    for (int i_0 = 0; i_0 < rank1[0]; i_0++) {
+        for (int i_1 = 0; i_1 < output_shape[1]; i_1++) {
+            for (int i_2 = 0; i_2 < hidden_shape1[1]; i_2++) {
+                int ind_i = sub2ind3(i_0, i_1, i_2, output_shape[1], hidden_shape1[1]);
+                int ind_o = sub2ind3(i_0, i_2, i_1, hidden_shape1[1], output_shape[1]);
+                weight[1][2 * 8*8*20*20 + ind_o] = weight[1][1 * 8*8*20*20 + ind_i];
+            }
+        }
+    }
+
     for (int i = 0; i < 1; i++) {
         tensor_train_forward(
             data_input_output_buffer,
@@ -196,8 +227,8 @@ int main(){
     TYPE_DATA* bias_grad[2];
     unsigned char label[100];
     assert(data_input_output_buffer != 0);
-    weight[0] = new TYPE_WEIGHT[8*8*20*20*4];
-    weight[1] = new TYPE_WEIGHT[8*8*20*20*2];
+    weight[0] = new TYPE_WEIGHT[8*8*20*20*5];
+    weight[1] = new TYPE_WEIGHT[8*8*20*20*3];
     weight_grad[0] = new TYPE_DATA[8*8*20*20*4];
     weight_grad[1] = new TYPE_DATA[8*8*20*20*2];
     bias[0] = new TYPE_DATA[512];

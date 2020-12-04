@@ -85,35 +85,31 @@ void tensor_cont_last(
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
-    int array_weight_size_0,
-    int array_weight_size_2
+    int array_weight_size_1
 ){
     /* tensor contraction on the first and last dimension
-    ABCxDCE->ABDE
+    ABCxBDC->AD
     */
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
     #endif 
     //TYPE_INTER res;
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
-        for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
-            for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
-                for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-                	TYPE_INTER res = 0;
-                    for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+        for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1++) {
+            TYPE_INTER res = 0;
+            for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+                for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
 #pragma HLS PIPELINE
-                        for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
+                    int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2,  array_in_size_1, array_in_size_2);
+                    int ind_w = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
+                    for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                            int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2+i_in_o,  
-                                array_in_size_1, array_in_size_2);
-                            int ind_w = sub2ind3(i_w_0, i_in_2+i_in_o, i_w_2, array_in_size_2, array_weight_size_2);
-                            res += array_in[ind_in] * array_weight[ind_w];
-                        }
+                        res += array_in[ind_in+i_in_o] * array_weight[ind_w+i_in_o];
                     }
-                    int ind_out = sub2ind4(i_in_0, i_in_1, i_w_0, i_w_2, array_in_size_1, array_weight_size_0, array_weight_size_2);
-                    array_out[ind_out] = res;
                 }
             }
+            int ind_out = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
+                array_out[ind_out] = res;
         }
     }
 }
@@ -142,12 +138,12 @@ void tensor_cont_end_backward(
                 res = 0;
                 for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
                     for (int i_in_3 = 0; i_in_3 < array_in_size_3; i_in_3 += PARALLEL_DEGREE) {
+                        int ind_in = sub2ind4(i_in_0, i_in_1, i_in_2, i_in_3, 
+                            array_in_size_1, array_in_size_2, array_in_size_3);
+                        int ind_w = sub2ind3(i_in_0, i_w_1, i_in_3, array_weight_size_1, array_in_size_3);
                         for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                            int ind_in = sub2ind4(i_in_0, i_in_1, i_in_2, i_in_3+i_in_o, 
-                                array_in_size_1, array_in_size_2, array_in_size_3);
-                            int ind_w = sub2ind3(i_in_0, i_w_1, i_in_3+i_in_o, array_weight_size_1, array_in_size_3);
-                            res += array_in[ind_in] * array_weight[ind_w];
+                            res += array_in[ind_in+i_in_o] * array_weight[ind_w+i_in_o];
                         }
                     }
                 }
@@ -180,8 +176,7 @@ void tensor_cont_head_backward(
                 res[i_in_o] = 0;
             }
             for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
-                int ind_in = sub2ind3(0, i_in_0, i_in_1,
-                    array_in_size_0, array_in_size_1);
+                int ind_in = sub2ind3(0, i_in_0, i_in_1, array_in_size_0, array_in_size_1);
                 int ind_w = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
                 for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
                     res[i_in_o] += array_in[ind_in] * array_weight[ind_w + i_in_o];
