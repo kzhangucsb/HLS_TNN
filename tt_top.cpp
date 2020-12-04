@@ -57,11 +57,10 @@ void tensor_train_forward(
                 mul_array_in,
                 weight + dim_mut * weight_offset,
                 mul_array_out,
-                1, 
                 in_shape_0,
+                1,
                 input_shape[dim_mut],
-                rank_left * output_shape[dim_mut],
-                1
+                rank_left * output_shape[dim_mut]
             );
         }
         else{
@@ -137,12 +136,11 @@ void tensor_train_input_grad(
         if (dim_mut == dim - 1) {
             tensor_cont_last(
                 mul_array_in,
-                weight + dim_mut * weight_offset,
+                weight + dim * weight_offset,
                 mul_array_out,
-                1, 
                 in_shape_0,
-                rank_left * output_shape[dim_mut],
-                1,
+                rank_left,
+                output_shape[dim_mut],
                 input_shape[dim_mut]
             );
         }
@@ -197,18 +195,15 @@ void tensor_train_weight_grad(
             //rank_left = rank[dim_mut - 1];
 
             mul_array_out = array_list + tmp_offset + (dim_mut - 1) * tmp_distance;
-            
-
             if (dim_mut == dim - 1) {    
                 tensor_cont_last(
                     array_list + array_in_offset,
                     weight + dim_mut * weight_offset,
                     mul_array_out,
-                    1, 
                     in_shape_0,
+                    1,
                     input_shape[dim_mut],
-                    rank[dim_mut - 1] * output_shape[dim_mut],
-                    1
+                    rank[dim_mut - 1] * output_shape[dim_mut]
                 );
             } // dim_mut == dim - 1
             else{
@@ -284,13 +279,12 @@ void tensor_train_weight_grad(
             if (dim_mut == dim - 1) {
                 tensor_cont_last(
                     mul_array_in,
-                    weight + dim_mut * weight_offset,
+                    weight + dim * weight_offset,
                     mul_array_out,
-                    1,
                     in_shape_0,
-                    rank_left * output_shape[dim_mut],
-                    w_shape_0,
-                    input_shape[dim_mut] * rank_right
+                    rank_left,
+                    output_shape[dim_mut],
+                    w_shape_0 * input_shape[dim_mut]
                 );
             
             }

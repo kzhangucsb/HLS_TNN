@@ -33,8 +33,7 @@ void tensor_cont_last(
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
-    int array_weight_size_0,
-    int array_weight_size_2
+    int array_weight_size_0
 );
 
 void tensor_train_forward(
