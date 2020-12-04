@@ -1,6 +1,8 @@
 #include "tt_nn.h"
 #ifndef SYNTHESIS
 #include <assert.h>
+#include <iostream>
+using namespace std;
 #endif
 
 inline int sub2ind3(
@@ -48,6 +50,15 @@ void tensor_cont_mid(
     */
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
+    cout << "tensor_cont_mid(array, weight, "; 
+    cout << in_offset << ", ";
+    cout << out_offset << ", ";
+    cout << weight_offset << ", ";
+    cout << array_in_size_0 << ", ";
+    cout << array_in_size_1 << ", ";
+    cout << array_in_size_2 << ", ";
+    cout << array_weight_size_0 << ", ";
+    cout << array_weight_size_2 << ");" << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
@@ -96,6 +107,14 @@ void tensor_cont_last(
     */
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
+    cout << "tensor_cont_last(array, weight, ";
+    cout << in_offset << ", ";
+    cout << out_offset << ", ";
+    cout << weight_offset << ", ";
+    cout << array_in_size_0 << ", ";
+    cout << array_in_size_1 << ", ";
+    cout << array_in_size_2 << ", ";
+    cout << array_weight_size_1 << ");" << endl;
     #endif 
     //TYPE_INTER res;
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
@@ -136,6 +155,15 @@ void tensor_cont_end_backward(
     */
     #ifndef SYNTHESIS
     assert (array_in_size_3 % PARALLEL_DEGREE == 0);
+    cout << "tensor_cont_end_backward(array, weight_grad, ";
+    cout << a1_offset << ", ";
+    cout << a2_offset << ", ";
+    cout << out_offset << ", ";
+    cout << array_in_size_0 << ", ";
+    cout << array_in_size_1 << ", ";
+    cout << array_in_size_2 << ", ";
+    cout << array_in_size_3 << ", ";
+    cout << array_weight_size_1 << ");" << endl;
     #endif 
     TYPE_INTER res;
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
@@ -176,6 +204,13 @@ void tensor_cont_head_backward(
     */
     #ifndef SYNTHESIS
     assert (array_in_size_1 % PARALLEL_DEGREE == 0);
+    cout << "tensor_cont_head_backward(array, weight_grad, ";
+    cout << a1_offset << ", ";
+    cout << a2_offset << ", ";
+    cout << out_offset << ", ";
+    cout << array_in_size_0 << ", ";
+    cout << array_in_size_1 << ", ";
+    cout << array_weight_size_1 << ");" << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
