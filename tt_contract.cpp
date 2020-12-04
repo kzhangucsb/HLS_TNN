@@ -28,9 +28,11 @@ inline int sub2ind4(
 }
 
 void tensor_cont_mid(
-    TYPE_DATA array_in[1073741824],
-    TYPE_WEIGHT array_weight[1048576],
-    TYPE_DATA array_out[1073741824],
+    TYPE_DATA array[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    int in_offset,
+    int out_offset,
+    int weight_offset,
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
@@ -63,14 +65,14 @@ void tensor_cont_mid(
 						int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
 						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-							res[i_in_o] += array_in[ind_in + i_in_o] * array_weight[ind_w];
+							res[i_in_o] += array[in_offset + ind_in + i_in_o] * weight[weight_offset + ind_w];
 						}
 					}
 					int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
 						array_weight_size_0, array_weight_size_2, array_in_size_2);
 					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-                        array_out[ind_out+i_in_o] = res[i_in_o];
+                        array[out_offset + ind_out+i_in_o] = res[i_in_o];
                     }
                 }
             }
@@ -79,9 +81,11 @@ void tensor_cont_mid(
 }
 
 void tensor_cont_last(
-    TYPE_DATA array_in[1073741824],
-    TYPE_WEIGHT array_weight[1048576],
-    TYPE_DATA array_out[1073741824],
+    TYPE_DATA array[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    int in_offset,
+    int out_offset,
+    int weight_offset,
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
@@ -104,21 +108,23 @@ void tensor_cont_last(
                     int ind_w = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
                     for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                        res += array_in[ind_in+i_in_o] * array_weight[ind_w+i_in_o];
+                        res += array[in_offset + ind_in+i_in_o] * weight[weight_offset+ind_w+i_in_o];
                     }
                 }
             }
             int ind_out = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
-                array_out[ind_out] = res;
+                array[out_offset+ind_out] = res;
         }
     }
 }
 
 
 void tensor_cont_end_backward(
-    TYPE_DATA array_in[1073741824],
-    TYPE_DATA array_weight[1048576],
-    TYPE_DATA array_out[1073741824],
+    TYPE_DATA array[1073741824],
+    TYPE_DATA grad_out[1073741824],
+    int a1_offset,
+    int a2_offset,
+    int out_offset,
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
@@ -143,22 +149,24 @@ void tensor_cont_end_backward(
                         int ind_w = sub2ind3(i_in_0, i_w_1, i_in_3, array_weight_size_1, array_in_size_3);
                         for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                            res += array_in[ind_in+i_in_o] * array_weight[ind_w+i_in_o];
+                            res += array[a1_offset+ind_in+i_in_o] * array[a2_offset+ind_w+i_in_o];
                         }
                     }
                 }
                 int ind_out = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
                 assert (ind_out < 8*8*20*20);
-                array_out[ind_out] += res;
+                grad_out[out_offset+ind_out] += res;
             }
         }
     }
 }
 
 void tensor_cont_head_backward(
-    TYPE_DATA array_in[1073741824],
-    TYPE_DATA array_weight[1048576],
-    TYPE_DATA array_out[1073741824],
+    TYPE_DATA array[1073741824],
+    TYPE_DATA grad_out[1073741824],
+    int a1_offset,
+    int a2_offset,
+    int out_offset,
     int array_in_size_0,
     int array_in_size_1,
     int array_weight_size_1
@@ -179,12 +187,12 @@ void tensor_cont_head_backward(
                 int ind_in = sub2ind3(0, i_in_0, i_in_1, array_in_size_0, array_in_size_1);
                 int ind_w = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
                 for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
-                    res[i_in_o] += array_in[ind_in] * array_weight[ind_w + i_in_o];
+                    res[i_in_o] += array[a1_offset+ind_in] * array[a2_offset+ind_w + i_in_o];
                 }
             }
             int ind_out = sub2ind3(0, i_in_1, i_w_1, array_in_size_1, array_weight_size_1);
             for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
-                array_out[ind_out + i_in_o] += res[i_in_o];
+                grad_out[out_offset+ind_out + i_in_o] += res[i_in_o];
             }
         }
     }

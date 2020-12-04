@@ -2,10 +2,11 @@
 
 void relu_inplace(
     TYPE_DATA* data,
+    int offset,
     int shape
 ){
     for (int i = 0; i < shape; i++) {
-        data[i] = data[i] > TYPE_DATA(0) ? data[i] : TYPE_DATA(0);
+        data[offset + i] = data[offset + i] > TYPE_DATA(0) ? data[offset + i] : TYPE_DATA(0);
     }
 }
 
