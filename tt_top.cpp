@@ -16,10 +16,12 @@ void tensor_train_forward(
 	int tmp_distance
 ){
 #pragma HLS ALLOCATION instances=1 function
-#pragma HLS ARRAY_MAP variable=input_shape horizontal
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
-#pragma HLS INTERFACE m_axi depth=1048576 port=bias
+#pragma HLS INTERFACE ap_memory depth=1048576 port=bias
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight
+#pragma HLS ARRAY_RESHAPE variable=array_list cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=bias cyclic factor=16 dim=1
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -101,6 +103,8 @@ void tensor_train_input_grad(
 ){
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight
+#pragma HLS ARRAY_RESHAPE variable=array_list cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight cyclic factor=16 dim=1
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -176,6 +180,10 @@ void tensor_train_weight_grad(
 ){
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight
+#pragma HLS INTERFACE ap_memory depth=1048576 port=weight_grad
+#pragma HLS ARRAY_RESHAPE variable=array_list cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight_grad cyclic factor=16 dim=1
     TYPE_DATA* mul_array_in;
     TYPE_DATA* mul_array_out;
 
@@ -361,6 +369,9 @@ void tensor_train_backward(
 #pragma HLS INTERFACE m_axi depth=1073741824 port=array_list offset=slave
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight_grad
+#pragma HLS ARRAY_RESHAPE variable=array_list cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight_grad cyclic factor=16 dim=1
     tensor_train_input_grad(
         array_list,
         weight,
@@ -392,4 +403,15 @@ void tensor_train_backward(
         );
     }
 }
+
+
+
+
+
+
+
+
+
+
+
 

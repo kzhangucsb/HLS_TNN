@@ -13,7 +13,7 @@ typedef float TYPE_DATA;
 typedef float TYPE_INTER;
 #endif
 
-#define PARALLEL_DEGREE 4
+#define PARALLEL_DEGREE 16
 
 void tensor_cont_mid(
     TYPE_DATA array_in[1073741824],

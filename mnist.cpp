@@ -22,14 +22,15 @@ void mnist_train_sync(
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight_grad1
 #pragma HLS INTERFACE ap_memory depth=1048576 port=bias_grad0
 #pragma HLS INTERFACE ap_memory depth=1048576 port=bias_grad1
-#pragma HLS ARRAY_PARTITION variable=weight0 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=weight1 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=bias0 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=bias1 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=weight_grad0 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=weight_grad1 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=bias_grad0 cyclic factor=16 dim=1
-#pragma HLS ARRAY_PARTITION variable=bias_grad1 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight0 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight1 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=bias0 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=bias1 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight_grad0 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=weight_grad1 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=bias_grad0 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=bias_grad1 cyclic factor=16 dim=1
+#pragma HLS ARRAY_RESHAPE variable=data_input_output_buffer cyclic factor=16 dim=1
 
     int input_shape[] = {7, 4, 7, 4};
     int hidden_shape0[] = {4, 8, 4, 4};

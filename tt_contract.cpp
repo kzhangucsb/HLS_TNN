@@ -46,6 +46,13 @@ void tensor_cont_mid(
     */
 //#pragma HLS stable variable=array_in
 //#pragma HLS stable variable=array_out
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_in offset=slave
+#pragma HLS INTERFACE ap_memory depth=1048576 port=array_weight
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_out
+#pragma HLS ARRAY_RESHAPE variable=array_in cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_weight cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_out cyclic factor=16
+#pragma HLS DEPENDENCE array inter false
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
     #endif 
@@ -54,25 +61,25 @@ void tensor_cont_mid(
         for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
             for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
 				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-#pragma HLS pipeline
+//#pragma HLS pipeline
 					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
                         res[i_in_o] = 0;
 					}
 					for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
 #pragma HLS pipeline
-						int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2);
+						int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2) / PARALLEL_DEGREE;
 						int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
 						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-							res[i_in_o] += array_in[ind_in + i_in_o] * array_weight[ind_w];
+							res[i_in_o] += array_in[ind_in * PARALLEL_DEGREE + i_in_o] * array_weight[ind_w];
 						}
 					}
 					int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
-						array_weight_size_0, array_weight_size_2, array_in_size_2);
+						array_weight_size_0, array_weight_size_2, array_in_size_2) / PARALLEL_DEGREE;
 					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-                        array_out[ind_out+i_in_o] = res[i_in_o];
+                        array_out[ind_out * PARALLEL_DEGREE + i_in_o] = res[i_in_o];
                     }
                 }
             }
@@ -92,6 +99,12 @@ void tensor_cont_last(
     /* tensor contraction on the first and last dimension
     ABCxBDC->AD
     */
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_in offset=slave
+#pragma HLS INTERFACE ap_memory depth=1048576 port=array_weight
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_out
+#pragma HLS ARRAY_RESHAPE variable=array_in cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_weight cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_out cyclic factor=16
     #ifndef SYNTHESIS
     assert (array_in_size_2 % PARALLEL_DEGREE == 0);
     #endif 
@@ -102,11 +115,11 @@ void tensor_cont_last(
             for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
                 for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
 #pragma HLS PIPELINE
-                    int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2,  array_in_size_1, array_in_size_2);
-                    int ind_w = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
+                    int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2,  array_in_size_1, array_in_size_2) / PARALLEL_DEGREE;
+                    int ind_w = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2) / PARALLEL_DEGREE;
                     for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                        res += array_in[ind_in+i_in_o] * array_weight[ind_w+i_in_o];
+                        res += array_in[ind_in*PARALLEL_DEGREE + i_in_o] * array_weight[ind_w*PARALLEL_DEGREE + i_in_o];
                     }
                 }
             }
@@ -130,6 +143,12 @@ void tensor_cont_end_backward(
     /* tensor contraction on the first and last dimension
     ABCDxAED->BEC
     */
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_in offset=slave
+#pragma HLS INTERFACE m_axi depth=1048576 port=array_weight
+#pragma HLS INTERFACE ap_memory depth=1073741824 port=array_out
+#pragma HLS ARRAY_RESHAPE variable=array_in cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_weight cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_out cyclic factor=16
     #ifndef SYNTHESIS
     assert (array_in_size_3 % PARALLEL_DEGREE == 0);
     #endif 
@@ -168,6 +187,12 @@ void tensor_cont_head_backward(
     /* tensor contraction on the first and last dimension
     ABxAE->BE
     */
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_in offset=slave
+#pragma HLS INTERFACE m_axi depth=1048576 port=array_weight
+#pragma HLS INTERFACE ap_memory depth=1073741824 port=array_out
+#pragma HLS ARRAY_RESHAPE variable=array_in cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_weight cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_out cyclic factor=16
     #ifndef SYNTHESIS
     assert (array_in_size_1 % PARALLEL_DEGREE == 0);
     #endif 
@@ -190,4 +215,74 @@ void tensor_cont_head_backward(
             }
         }
     }
+}
+
+
+void tensor_cont_mid_wrapper(
+	TYPE_DATA array_in[1073741824],
+	TYPE_WEIGHT array_weight[1048576]
+	//TYPE_DATA array_out[1073741824]
+) {
+
+
+#pragma HLS INTERFACE m_axi depth=1073741824 port=array_in offset=slave
+#pragma HLS INTERFACE ap_memory depth=1048576 port=array_weight
+#pragma HLS ARRAY_RESHAPE variable=array_in cyclic factor=16
+#pragma HLS ARRAY_RESHAPE variable=array_weight cyclic factor=16
+//#pragma HLS DEPENDENCE variable=array_in false
+		tensor_cont_mid(
+			array_in,
+			array_weight,
+			array_in + 4096*64,
+			8,
+			8,
+			32,
+			4,
+			4
+		);
+//		tensor_cont_mid(
+//			array_in + 256,
+//			array_weight + 1024,
+//			array_out + 512,
+//			6,
+//			6,
+//			48,
+//			3,
+//			3
+//		);
+//    int array_in_size_0 = 8;
+//    int array_in_size_1 = 8;
+//    int array_in_size_2 = 32;
+//    int array_weight_size_0 = 4;
+//    int array_weight_size_2 = 4;
+//
+//    TYPE_INTER res[PARALLEL_DEGREE];
+//    for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+//        for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
+//            for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
+//				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
+////#pragma HLS pipeline
+//					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+//#pragma HLS UNROLL
+//                        res[i_in_o] = 0;
+//					}
+//					for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
+//#pragma HLS pipeline
+//						int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2) / PARALLEL_DEGREE;
+//						int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
+//						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+//#pragma HLS UNROLL
+//							res[i_in_o] += array_in[ind_in * PARALLEL_DEGREE + i_in_o] * array_weight[ind_w];
+//						}
+//					}
+//					int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
+//						array_weight_size_0, array_weight_size_2, array_in_size_2) / PARALLEL_DEGREE;
+//					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+//#pragma HLS UNROLL
+//                        array_in[4096*64 + ind_out * PARALLEL_DEGREE + i_in_o] = res[i_in_o];
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
