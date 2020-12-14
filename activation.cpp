@@ -9,12 +9,14 @@ void relu_inplace(
     int offset,
     int shape
 ){
+#pragma HLS DEPENDENCE variable=data inter false
     #ifndef SYNTHESIS
     cout << "relu_inplace(array, ";
     cout << offset << ", ";
     cout << shape << ");" << endl;
     #endif
     for (int i = 0; i < shape; i++) {
+#pragma HLS PIPELINE
         data[offset + i] = data[offset + i] > TYPE_DATA(0) ? data[offset + i] : TYPE_DATA(0);
     }
 }
@@ -25,6 +27,7 @@ void relu_backward_inplace(
     int grad_offset,
     int shape
 ){
+#pragma HLS DEPENDENCE variable=data inter false
     #ifndef SYNTHESIS
     cout << "relu_backward_inplace(array, ";
     cout << data_offset << ", ";
@@ -32,6 +35,7 @@ void relu_backward_inplace(
     cout << shape << ");" << endl;
     #endif
     for (int i = 0; i < shape; i++) {
+#pragma HLS PIPELINE
         data[grad_offset + i] = data[data_offset + i] > TYPE_DATA(0) ? data[grad_offset + i] : TYPE_DATA(0);
     }
 }

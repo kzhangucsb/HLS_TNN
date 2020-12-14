@@ -68,23 +68,32 @@ void tensor_cont_mid(
     cout << array_weight_size_2 << ");" << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
+    TYPE_DATA local[1024][PARALLEL_DEGREE];
+#pragma HLS ARRAY_RESHAPE variable=local dim=2
+#pragma HLS resource variable=local core=RAM_1P
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
-        for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
-            for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
+		for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
+			for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+				int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2);
+				for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
+					local[i_in_1][i_in_o] = array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
+				}
+			}
+			for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
 				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-//#pragma HLS pipeline
 					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
                         res[i_in_o] = 0;
 					}
-					for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
+					loop_in_1: for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
 #pragma HLS pipeline
-						int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2);
 						int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
 						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-							res[i_in_o] += array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
-												 * weight[weight_offset + ind_w];
+//							res[i_in_o] += array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+//												 * weight[weight_offset + ind_w];
+							res[i_in_o] += local[i_in_1][i_in_o] * weight[weight_offset + ind_w];
 						}
 					}
 					int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
@@ -130,18 +139,33 @@ void tensor_cont_last(
     cout << array_weight_size_1 << ");" << endl;
     #endif 
     //TYPE_INTER res;
+    TYPE_DATA local[32][16];
+#pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
+#pragma HLS resource variable=local core=RAM_1P
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+    	for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+            for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+            	int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2,  array_in_size_1, array_in_size_2);
+            	for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
+#pragma HLS UNROLL
+            		local[i_in_1][i_in_2 / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+								  = array[(in_offset + ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
+            	}
+            }
+    	}
         for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1++) {
-            TYPE_INTER res = 0;
-            for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
-                for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+        	TYPE_INTER res = 0;
+            loop_in_1: for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+                loop_in_2: for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
 #pragma HLS PIPELINE
-                    int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2,  array_in_size_1, array_in_size_2);
+
                     int ind_w = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
                     for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                        res += array[(in_offset + ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
-									 * weight[(weight_offset+ind_w) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
+//                        res += array[(in_offset + ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+//									 * weight[(weight_offset+ind_w) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
+                    	res += local[i_in_1][i_in_2 / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+											 * weight[(weight_offset+ind_w)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
                     }
                 }
             }
@@ -185,19 +209,36 @@ void tensor_cont_end_backward(
     cout << array_weight_size_1 << ");" << endl;
     #endif 
     TYPE_INTER res;
+    TYPE_DATA local[32][128];
+#pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
+#pragma HLS resource variable=local core=RAM_1P
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
         for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2++) {
+        	for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+        	     for (int i_in_3 = 0; i_in_3 < array_in_size_3; i_in_3 += PARALLEL_DEGREE) {
+#pragma HLS PIPELINE
+        	    	 int ind_in = sub2ind4(i_in_0, i_in_1, i_in_2, i_in_3,
+        	    			 array_in_size_1, array_in_size_2, array_in_size_3);
+        	    	 for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
+#pragma HLS UNROLL
+        	    		 local[i_in_0][i_in_3 / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+									   = array[(a1_offset+ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
+        	    	 }
+        	     }
+        	}
+
             for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1++) {
                 res = 0;
                 for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
                     for (int i_in_3 = 0; i_in_3 < array_in_size_3; i_in_3 += PARALLEL_DEGREE) {
 #pragma HLS PIPELINE
-                        int ind_in = sub2ind4(i_in_0, i_in_1, i_in_2, i_in_3, 
-                            array_in_size_1, array_in_size_2, array_in_size_3);
+//                        int ind_in = sub2ind4(i_in_0, i_in_1, i_in_2, i_in_3,
+//                            array_in_size_1, array_in_size_2, array_in_size_3);
                         int ind_w = sub2ind3(i_in_0, i_w_1, i_in_3, array_weight_size_1, array_in_size_3);
                         for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-                            res += array[(a1_offset+ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+                            //res += array[(a1_offset+ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+                        	res += local[i_in_0][i_in_3 / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
 										 * array[(a2_offset+ind_w) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
                         }
                     }
@@ -238,7 +279,15 @@ void tensor_cont_head_backward(
     cout << array_weight_size_1 << ");" << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
+    TYPE_DATA local[256];
+#pragma HLS ARRAY_RESHAPE variable=local dim=1 factor=16
+#pragma HLS resource variable=local core=RAM_1P
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+    	for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+#pragma HLS PIPELINE
+			int ind_in = sub2ind3(0, i_in_0, i_in_1, array_in_size_0, array_in_size_1);
+			local[i_in_0] = array[a1_offset+ind_in];
+    	}
         for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1+= PARALLEL_DEGREE) {
             for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
@@ -250,7 +299,7 @@ void tensor_cont_head_backward(
                 int ind_w = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
                 for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-                    res[i_in_o] += array[a1_offset+ind_in]
+                    res[i_in_o] += local[i_in_0]//array[a1_offset+ind_in]
 								* array[(a2_offset+ind_w) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
                 }
             }
