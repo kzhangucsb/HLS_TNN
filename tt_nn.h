@@ -152,3 +152,21 @@ void softmax_ce_grad(
     int grad_offset,
     unsigned char num_class
 );
+
+void adam_step(
+	ap_ufixed<16, 1> beta1,
+	ap_ufixed<16, 1> beta2
+);
+
+void adam(
+    TYPE_DATA grad[1048576],
+    TYPE_BUFFER buffer1[1048576],
+	TYPE_BUFFER buffer2[1048576],
+    TYPE_WEIGHT weight[1048576],
+	int offset,
+    int shape,
+    ap_ufixed<16, 1> lr,
+	ap_ufixed<16, 1> beta1,
+	ap_ufixed<16, 1> beta2,
+	ap_ufixed<16, 1> eps
+);
