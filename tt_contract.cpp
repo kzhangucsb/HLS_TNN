@@ -39,7 +39,8 @@ void tensor_cont_mid(
     int array_in_size_1,
     int array_in_size_2,
     int array_weight_size_0,
-    int array_weight_size_2
+    int array_weight_size_2,
+	int shift
 ){
     /* tensor contraction on the second dimension
     ABCxDBE->ADEC
@@ -100,7 +101,7 @@ void tensor_cont_mid(
 						array_weight_size_0, array_weight_size_2, array_in_size_2);
 					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-                        array[(out_offset + ind_out) / PARALLEL_DEGREE * PARALLEL_DEGREE +i_in_o] = res[i_in_o];
+                        array[(out_offset + ind_out) / PARALLEL_DEGREE * PARALLEL_DEGREE +i_in_o] = res[i_in_o] >> shift;
                     }
                 }
             }
@@ -117,7 +118,8 @@ void tensor_cont_last(
     int array_in_size_0,
     int array_in_size_1,
     int array_in_size_2,
-    int array_weight_size_1
+    int array_weight_size_1,
+	int shift
 ){
     /* tensor contraction on the first and last dimension
     ABCxBDC->AD
@@ -170,7 +172,7 @@ void tensor_cont_last(
                 }
             }
             int ind_out = sub2ind3(0, i_in_0, i_w_1, array_in_size_0, array_weight_size_1);
-                array[out_offset+ind_out] = res;
+                array[out_offset+ind_out] = res >> shift;
         }
     }
 }
@@ -178,7 +180,7 @@ void tensor_cont_last(
 
 void tensor_cont_end_backward(
     TYPE_DATA array[1073741824],
-    TYPE_DATA grad_out[1073741824],
+    TYPE_GRAD grad_out[1073741824],
     int a1_offset,
     int a2_offset,
     int out_offset,
@@ -186,7 +188,8 @@ void tensor_cont_end_backward(
     int array_in_size_1,
     int array_in_size_2,
     int array_in_size_3,
-    int array_weight_size_1
+    int array_weight_size_1,
+	int shift
 ){
     /* tensor contraction on the first and last dimension
     ABCDxAED->BEC
@@ -244,7 +247,7 @@ void tensor_cont_end_backward(
                     }
                 }
                 int ind_out = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
-                grad_out[out_offset+ind_out] += res;
+                grad_out[out_offset+ind_out] += res >> shift;
             }
         }
     }
@@ -252,13 +255,14 @@ void tensor_cont_end_backward(
 
 void tensor_cont_head_backward(
     TYPE_DATA array[1073741824],
-    TYPE_DATA grad_out[1073741824],
+    TYPE_GRAD grad_out[1073741824],
     int a1_offset,
     int a2_offset,
     int out_offset,
     int array_in_size_0,
     int array_in_size_1,
-    int array_weight_size_1
+    int array_weight_size_1,
+	int shift
 ){
     /* tensor contraction on the first and last dimension
     ABxAE->BE
@@ -306,7 +310,7 @@ void tensor_cont_head_backward(
             int ind_out = sub2ind3(0, i_in_1, i_w_1, array_in_size_1, array_weight_size_1);
             for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
 #pragma HLS UNROLL
-                grad_out[(out_offset+ind_out) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o] += res[i_in_o];
+                grad_out[(out_offset+ind_out) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o] += res[i_in_o] >> shift;
             }
         }
     }
