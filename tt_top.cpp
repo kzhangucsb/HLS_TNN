@@ -210,7 +210,7 @@ void tensor_train_input_grad(
 void tensor_train_weight_grad(
     TYPE_DATA array_list[1073741824],
     TYPE_WEIGHT weight[1048576],
-    TYPE_DATA weight_grad[1048576],
+    TYPE_GRAD weight_grad[1048576],
     int input_shape[4],
     int output_shape[4],
     int rank[4],
@@ -432,7 +432,7 @@ void tensor_train_weight_grad(
 void tensor_train_backward(
     TYPE_DATA array_list[1073741824],
     TYPE_WEIGHT weight[1048576],
-    TYPE_DATA weight_grad[1048576],
+    TYPE_GRAD weight_grad[1048576],
     int input_shape[4],
     int output_shape[4],
     int rank[4],

@@ -2,6 +2,7 @@
 #ifndef SYNTHESIS
 #include <assert.h>
 #include <iostream>
+#include <math.h>
 using namespace std;
 #endif
 
@@ -89,6 +90,19 @@ void tensor_cont_mid(
             }
         }
     }
+    #if not defined SYNTHESIS and not defined QUANTIZE
+    float max_val = 0;
+    float mean_val = 0;
+    for (int i = 0; i < array_in_size_0 * array_weight_size_0 * array_weight_size_2 * array_in_size_2; i++) {
+        if (abs(array[out_offset + i]) > max_val){
+            max_val = abs(array[out_offset + i]);
+        }
+        mean_val += array[out_offset + i] * array[out_offset + i];
+    }
+    mean_val /= array_in_size_0 * array_weight_size_0 * array_weight_size_2 * array_in_size_2;
+    cout << "output: max " << max_val << " mean " << mean_val 
+        << " size " << array_in_size_0 * array_weight_size_0 * array_weight_size_2 * array_in_size_2 << endl;
+    #endif
 }
 
 void tensor_cont_last(
@@ -135,12 +149,25 @@ void tensor_cont_last(
                 array[out_offset+ind_out] = res;
         }
     }
+    #if not defined SYNTHESIS and not defined QUANTIZE
+    float max_val = 0;
+    float mean_val = 0;
+    for (int i = 0; i < array_in_size_0 * array_weight_size_1; i++) {
+        if (abs(array[out_offset + i]) > max_val){
+            max_val = abs(array[out_offset + i]);
+        }
+        mean_val += array[out_offset + i] * array[out_offset + i];
+    }
+    mean_val /= array_in_size_0 * array_weight_size_1;
+    cout << "output: max " << max_val << " mean " << mean_val 
+        << " size " << array_in_size_0 * array_weight_size_1 << endl;
+    #endif
 }
 
 
 void tensor_cont_end_backward(
     TYPE_DATA array[1073741824],
-    TYPE_DATA grad_out[1073741824],
+    TYPE_GRAD grad_out[1073741824],
     int a1_offset,
     int a2_offset,
     int out_offset,
@@ -187,11 +214,24 @@ void tensor_cont_end_backward(
             }
         }
     }
+    #if not defined SYNTHESIS and not defined QUANTIZE
+    float max_val = 0;
+    float mean_val = 0;
+    for (int i = 0; i < array_in_size_1 * array_weight_size_1 * array_in_size_2; i++) {
+        if (abs(grad_out[out_offset + i]) > max_val){
+            max_val = abs(grad_out[out_offset + i]);
+        }
+        mean_val += grad_out[out_offset + i] * grad_out[out_offset + i];
+    }
+    mean_val /= array_in_size_1 * array_weight_size_1 * array_in_size_2;
+    cout << "output: max " << max_val << " mean " << mean_val 
+        << " size " << array_in_size_1 * array_weight_size_1 * array_in_size_2 << endl;
+    #endif
 }
 
 void tensor_cont_head_backward(
     TYPE_DATA array[1073741824],
-    TYPE_DATA grad_out[1073741824],
+    TYPE_GRAD grad_out[1073741824],
     int a1_offset,
     int a2_offset,
     int out_offset,
@@ -231,4 +271,17 @@ void tensor_cont_head_backward(
             }
         }
     }
+    #if not defined SYNTHESIS and not defined QUANTIZE
+    float max_val = 0;
+    float mean_val = 0;
+    for (int i = 0; i < array_in_size_1 * array_weight_size_1; i++) {
+        if (abs(grad_out[out_offset + i]) > max_val){
+            max_val = abs(grad_out[out_offset + i]);
+        }
+        mean_val += grad_out[out_offset + i] * grad_out[out_offset + i];
+    }
+    mean_val /= array_in_size_1 * array_weight_size_1;
+    cout << "output: max " << max_val << " mean " << mean_val 
+        << " size " << array_in_size_1 * array_weight_size_1 << endl;
+    #endif
 }
