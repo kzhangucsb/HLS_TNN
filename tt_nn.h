@@ -1,4 +1,4 @@
-#define SYNTHESIS
+//#define SYNTHESIS
 #ifdef SYNTHESIS
 #include <ap_fixed.h>
 #include <hls_math.h>
@@ -9,12 +9,16 @@
 #define TYPE_INTER ap_fixed<16, 1>
 #define TYPE_WEIGHT_BUFF ap_fixed<8, 1>
 #define TYPE_BUFFER ap_fixed<32, 1>
+#define TYPE_PARA ap_fixed<16, 0>
 #else
 #include <math.h>
 typedef float TYPE_WEIGHT ;
 typedef float TYPE_DATA;
 typedef float TYPE_INTER;
 typedef float TYPE_BUFFER;
+typedef float TYPE_GRAD;
+typedef float TYPE_PARA;
+typedef float TYPE_WEIGHT_BUFF;
 #endif
 
 #define PARALLEL_DEGREE 8
@@ -160,8 +164,8 @@ void softmax_ce_grad(
 );
 
 void adam_step(
-	ap_ufixed<16, 1> beta1,
-	ap_ufixed<16, 1> beta2
+	TYPE_PARA beta1,
+	TYPE_PARA beta2
 );
 
 void adam(
@@ -172,10 +176,10 @@ void adam(
 	TYPE_WEIGHT_BUFF weight_buffer[1048576],
 	int offset,
     int shape,
-    ap_ufixed<16, 1> lr,
-	ap_ufixed<16, 1> beta1,
-	ap_ufixed<16, 1> beta2,
-	ap_ufixed<16, 1> eps
+    TYPE_PARA lr,
+	TYPE_PARA beta1,
+	TYPE_PARA beta2,
+	TYPE_PARA eps
 );
 
 void get_rank_para_update(
