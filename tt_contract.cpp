@@ -141,43 +141,44 @@ void tensor_cont_mid(
 #pragma HLS resource variable=localr core=RAM_1P
 #pragma HLS ARRAY_RESHAPE variable=locall dim=2
 #pragma HLS ARRAY_RESHAPE variable=localr dim=2
-for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
-	tensor_cont_mid_load(
-		array, weight, in_offset, out_offset, weight_offset,
-		array_in_size_0, array_in_size_1, array_in_size_2,
-		array_weight_size_0, array_weight_size_2, shift,
-		localr, 0, i_in_2
-	);
-	for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
-		if (i_in_0 % 2 == 0){
-			tensor_cont_mid_load(
-				array, weight, in_offset, out_offset, weight_offset,
-				array_in_size_0, array_in_size_1, array_in_size_2,
-				array_weight_size_0, array_weight_size_2, shift,
-				locall, i_in_0 + 1, i_in_2
-			);
-			tensor_cont_mid_compute(
-				array, weight, in_offset, out_offset, weight_offset,
-				array_in_size_0, array_in_size_1, array_in_size_2,
-				array_weight_size_0, array_weight_size_2, shift,
-				localr, i_in_0, i_in_2
-			);
-		}
-		else {
-			tensor_cont_mid_load(
-				array, weight, in_offset, out_offset, weight_offset,
-				array_in_size_0, array_in_size_1, array_in_size_2,
-				array_weight_size_0, array_weight_size_2, shift,
-				localr, i_in_0 + 1, i_in_2
-			);
-			tensor_cont_mid_compute(
-				array, weight, in_offset, out_offset, weight_offset,
-				array_in_size_0, array_in_size_1, array_in_size_2,
-				array_weight_size_0, array_weight_size_2, shift,
-				locall, i_in_0, i_in_2
-			);
-		}
-	}
+    for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
+        tensor_cont_mid_load(
+            array, weight, in_offset, out_offset, weight_offset,
+            array_in_size_0, array_in_size_1, array_in_size_2,
+            array_weight_size_0, array_weight_size_2, shift,
+            localr, 0, i_in_2
+        );
+        for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
+            if (i_in_0 % 2 == 0){
+                tensor_cont_mid_load(
+                    array, weight, in_offset, out_offset, weight_offset,
+                    array_in_size_0, array_in_size_1, array_in_size_2,
+                    array_weight_size_0, array_weight_size_2, shift,
+                    locall, i_in_0 + 1, i_in_2
+                );
+                tensor_cont_mid_compute(
+                    array, weight, in_offset, out_offset, weight_offset,
+                    array_in_size_0, array_in_size_1, array_in_size_2,
+                    array_weight_size_0, array_weight_size_2, shift,
+                    localr, i_in_0, i_in_2
+                );
+            }
+            else {
+                tensor_cont_mid_load(
+                    array, weight, in_offset, out_offset, weight_offset,
+                    array_in_size_0, array_in_size_1, array_in_size_2,
+                    array_weight_size_0, array_weight_size_2, shift,
+                    localr, i_in_0 + 1, i_in_2
+                );
+                tensor_cont_mid_compute(
+                    array, weight, in_offset, out_offset, weight_offset,
+                    array_in_size_0, array_in_size_1, array_in_size_2,
+                    array_weight_size_0, array_weight_size_2, shift,
+                    locall, i_in_0, i_in_2
+                );
+            }
+        }
+    }
 }
 
 void tensor_cont_last_load(
@@ -194,7 +195,6 @@ void tensor_cont_last_load(
     TYPE_DATA local[32][16],
     int i_in_0
 ){
-    
 #pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
 #pragma HLS resource variable=local core=RAM_1P
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
@@ -208,6 +208,7 @@ void tensor_cont_last_load(
         }
     }
 }
+
 void tensor_cont_last_compute(
     TYPE_DATA array[1073741824],
     TYPE_WEIGHT weight[1048576],
