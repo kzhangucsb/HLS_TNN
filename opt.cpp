@@ -58,16 +58,24 @@ void add_bayes_grad(
 	TYPE_WEIGHT_BUFF weight_buffer[1048576],
 	TYPE_GRAD grad[1048576],
 	float rank_parameter[1048576],
-	float scale,
+	ap_ufixed<16, 0> scale,
 	int offset,
 	int num_rank,
 	int num_para_per_rank
 ){
 	for (int i = 0; i < num_rank; i++) {
 		int offset_rank = i * num_para_per_rank;
-		for (int j = 0; j < num_para_per_rank; j++) {
-			grad[offset + offset_rank + j] += TYPE_GRAD(
-					float(weight_buffer[offset + offset_rank + j]) * scale / (rank_parameter[i] + 1e-6));
+		if (rank_parameter[i] > 0.001) {
+			for (int j = 0; j < num_para_per_rank; j++) {
+				grad[offset + offset_rank + j] += TYPE_GRAD(
+						float(weight_buffer[offset + offset_rank + j]) / (rank_parameter[i])) * scale;
+			}
+		}
+		else{
+			for (int j = 0; j < num_para_per_rank; j++) {
+				grad[offset + offset_rank + j] += TYPE_GRAD(
+						float(weight_buffer[offset + offset_rank + j]) * 1000) * scale;
+			}
 		}
 	}
 }
