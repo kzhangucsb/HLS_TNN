@@ -29,6 +29,77 @@ inline int sub2ind4(
     return ((ind0 * size1 + ind1) * size2 + ind2) * size3 + ind3;
 }
 
+void tensor_cont_mid_compute(
+    TYPE_DATA array[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    int in_offset,
+    int out_offset,
+    int weight_offset,
+    int array_in_size_0,
+    int array_in_size_1,
+    int array_in_size_2,
+    int array_weight_size_0,
+    int array_weight_size_2,
+    int shift,
+    TYPE_DATA local[1024][PARALLEL_DEGREE],
+    int i_in_0,
+    int i_in_2
+){
+    TYPE_INTER res[PARALLEL_DEGREE];
+#pragma HLS ARRAY_RESHAPE variable=local dim=2
+    for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
+        for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
+            for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
+                res[i_in_o] = 0;
+            }
+            loop_in_1: for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
+#pragma HLS pipeline
+                int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
+                for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
+//							res[i_in_o] += array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
+//												 * weight[weight_offset + ind_w];
+                    res[i_in_o] += local[i_in_1][i_in_o] * weight[weight_offset + ind_w];
+                }
+            }
+            int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
+                array_weight_size_0, array_weight_size_2, array_in_size_2);
+            for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#ifdef SYNTHESIS
+                array[(out_offset + ind_out) / PARALLEL_DEGREE * PARALLEL_DEGREE +i_in_o] = res[i_in_o] >> shift;
+#else
+                array[(out_offset + ind_out)  +i_in_o] = res[i_in_o] / pow(2, shift);
+#endif
+            }
+        }
+    }
+}
+
+void tensor_cont_mid_load(
+    TYPE_DATA array[1073741824],
+    TYPE_WEIGHT weight[1048576],
+    int in_offset,
+    int out_offset,
+    int weight_offset,
+    int array_in_size_0,
+    int array_in_size_1,
+    int array_in_size_2,
+    int array_weight_size_0,
+    int array_weight_size_2,
+	int shift,
+    TYPE_DATA local[1024][PARALLEL_DEGREE], 
+    int i_in_0,
+    int i_in_1,
+    int i_in_2
+){
+    int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2);
+    for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
+#pragma HLS UNROLL
+        local[i_in_1][i_in_o] = array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
+    }
+}
+
 void tensor_cont_mid(
     TYPE_DATA array[1073741824],
     TYPE_WEIGHT weight[1048576],
@@ -69,42 +140,50 @@ void tensor_cont_mid(
     cout << array_weight_size_2 << ");" << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
-    TYPE_DATA local[1024][PARALLEL_DEGREE];
+    TYPE_DATA locall[1024][PARALLEL_DEGREE];
+    TYPE_DATA localr[1024][PARALLEL_DEGREE];
 #pragma HLS ARRAY_RESHAPE variable=local dim=2
-#pragma HLS resource variable=local core=RAM_1P
+#pragma HLS resource variable=locall core=RAM_1P
+#pragma HLS resource variable=localr core=RAM_1P
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
 		for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
+            tensor_cont_mid_load(
+                array, weight, in_offset, out_offset, weight_offset,
+                array_in_size_0, array_in_size_1, array_in_size_2,  
+                array_weight_size_0, array_weight_size_2, shift,
+                localr, i_in_0, 0, i_in_2
+            );
 			for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
-				int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2, array_in_size_1, array_in_size_2);
-				for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
-#pragma HLS UNROLL
-					local[i_in_1][i_in_o] = array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
-				}
-			}
-			for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
-				for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
-					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
-#pragma HLS UNROLL
-                        res[i_in_o] = 0;
-					}
-					loop_in_1: for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1 += 1) {
-#pragma HLS pipeline
-						int ind_w = sub2ind3(i_w_0, i_in_1, i_w_2, array_in_size_1, array_weight_size_2);
-						for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
-#pragma HLS UNROLL
-//							res[i_in_o] += array[(in_offset + ind_in)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
-//												 * weight[weight_offset + ind_w];
-							res[i_in_o] += local[i_in_1][i_in_o] * weight[weight_offset + ind_w];
-						}
-					}
-					int ind_out = sub2ind4(i_in_0, i_w_0, i_w_2,  i_in_2,
-						array_weight_size_0, array_weight_size_2, array_in_size_2);
-					for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++){
-#pragma HLS UNROLL
-                        array[(out_offset + ind_out) / PARALLEL_DEGREE * PARALLEL_DEGREE +i_in_o] = res[i_in_o] >> shift;
-                    }
+				if (i_in_1 % 2 == 0){
+                    tensor_cont_mid_load(
+                        array, weight, in_offset, out_offset, weight_offset,
+                        array_in_size_0, array_in_size_1, array_in_size_2,  
+                        array_weight_size_0, array_weight_size_2, shift,
+                        locall, i_in_0, i_in_1, i_in_2
+                    );
+                    tensor_cont_mid_compute(
+                        array, weight, in_offset, out_offset, weight_offset,
+                        array_in_size_0, array_in_size_1, array_in_size_2,  
+                        array_weight_size_0, array_weight_size_2, shift,
+                        localr, i_in_0, i_in_2
+                    );
                 }
-            }
+                else {
+                    tensor_cont_mid_load(
+                        array, weight, in_offset, out_offset, weight_offset,
+                        array_in_size_0, array_in_size_1, array_in_size_2,  
+                        array_weight_size_0, array_weight_size_2, shift,
+                        localr, i_in_0, i_in_1, i_in_2
+                    );
+                    tensor_cont_mid_compute(
+                        array, weight, in_offset, out_offset, weight_offset,
+                        array_in_size_0, array_in_size_1, array_in_size_2,  
+                        array_weight_size_0, array_weight_size_2, shift,
+                        locall, i_in_0, i_in_2
+                    );
+                }
+			}
+			
         }
     }
 }
