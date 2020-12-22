@@ -11,7 +11,9 @@
 			"array": "cpp",
 			"string": "cpp",
 			"string_view": "cpp",
-			"iostream": "cpp"
+			"iostream": "cpp",
+			"memory_resource": "cpp",
+			"cmath": "cpp"
 		}
 	}
 }
