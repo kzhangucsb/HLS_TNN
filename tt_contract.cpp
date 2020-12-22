@@ -60,6 +60,7 @@ void tensor_cont_mid(
     cout << array_in_size_2 << ", ";
     cout << array_weight_size_0 << ", ";
     cout << array_weight_size_2 << ");" << endl;
+    cout << "FLOPS: " << array_in_size_0 * array_in_size_1 * array_in_size_2 * array_weight_size_0 * array_weight_size_2 << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
@@ -129,6 +130,7 @@ void tensor_cont_last(
     cout << array_in_size_1 << ", ";
     cout << array_in_size_2 << ", ";
     cout << array_weight_size_1 << ");" << endl;
+    cout << "FLOPS: " << array_in_size_0 * array_in_size_1 * array_in_size_2 * array_weight_size_1 << endl;
     #endif 
     //TYPE_INTER res;
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
@@ -191,6 +193,7 @@ void tensor_cont_end_backward(
     cout << array_in_size_2 << ", ";
     cout << array_in_size_3 << ", ";
     cout << array_weight_size_1 << ");" << endl;
+    cout << "FLOPS: " << array_in_size_0 * array_in_size_1 * array_in_size_2 * array_in_size_3 * array_weight_size_1 << endl;
     #endif 
     TYPE_INTER res;
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
@@ -251,6 +254,7 @@ void tensor_cont_head_backward(
     cout << array_in_size_0 << ", ";
     cout << array_in_size_1 << ", ";
     cout << array_weight_size_1 << ");" << endl;
+    cout << "FLOPS: " << array_in_size_0 * array_in_size_1 *  array_weight_size_1 << endl;
     #endif 
     TYPE_INTER res[PARALLEL_DEGREE];
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
