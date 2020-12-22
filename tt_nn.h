@@ -1,4 +1,4 @@
-//#define SYNTHESIS
+#define SYNTHESIS
 #ifdef SYNTHESIS
 #include <ap_fixed.h>
 #include <hls_math.h>
@@ -195,7 +195,7 @@ void add_bayes_grad(
 	TYPE_WEIGHT_BUFF weight_buffer[1048576],
 	TYPE_GRAD grad[1048576],
 	float rank_parameter[1048576],
-	ap_ufixed<16,0> scale,
+	TYPE_PARA scale,
 	int offset,
 	int num_rank,
 	int num_para_per_rank

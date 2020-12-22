@@ -5,8 +5,8 @@ static ap_ufixed<16, 1> beta1c = 1;
 static ap_ufixed<16, 1> beta2c = 1;
 
 void adam_step(
-	ap_ufixed<16, 1> beta1,
-	ap_ufixed<16, 1> beta2
+	TYPE_PARA beta1,
+	TYPE_PARA beta2
 ) {
 	step += 0;
 	beta1c *= beta1;
@@ -21,10 +21,10 @@ void adam(
 	TYPE_WEIGHT_BUFF weight_buffer[1048576],
 	int offset,
     int shape,
-    ap_ufixed<16, 1> lr,
-	ap_ufixed<16, 1> beta1,
-	ap_ufixed<16, 1> beta2,
-	ap_ufixed<16, 1> eps
+	TYPE_PARA lr,
+	TYPE_PARA beta1,
+	TYPE_PARA beta2,
+	TYPE_PARA eps
 ){
     for (int i = offset; i < offset + shape; i++) {
     	buffer1[i] += (1 - beta1) * (grad[i] - buffer1[i]);
@@ -58,7 +58,7 @@ void add_bayes_grad(
 	TYPE_WEIGHT_BUFF weight_buffer[1048576],
 	TYPE_GRAD grad[1048576],
 	float rank_parameter[1048576],
-	ap_ufixed<16, 0> scale,
+	TYPE_PARA scale,
 	int offset,
 	int num_rank,
 	int num_para_per_rank

@@ -46,6 +46,7 @@ void tensor_cont_mid_compute(
     int i_in_2
 ){
     TYPE_INTER res[PARALLEL_DEGREE];
+#pragma HLS ARRAY_RESHAPE variable=res complete
 #pragma HLS ARRAY_RESHAPE variable=local dim=2
     for (int i_w_0 = 0; i_w_0 < array_weight_size_0; i_w_0++) {
         for (int i_w_2 = 0; i_w_2 < array_weight_size_2; i_w_2++) {
@@ -139,12 +140,15 @@ void tensor_cont_mid(
     cout << array_weight_size_0 << ", ";
     cout << array_weight_size_2 << ");" << endl;
     #endif 
-    TYPE_INTER res[PARALLEL_DEGREE];
+    //TYPE_INTER res[PARALLEL_DEGREE];
     TYPE_DATA locall[1024][PARALLEL_DEGREE];
     TYPE_DATA localr[1024][PARALLEL_DEGREE];
-#pragma HLS ARRAY_RESHAPE variable=local dim=2
+#pragma HLS ARRAY_RESHAPE variable=locall dim=2
+#pragma HLS ARRAY_RESHAPE variable=localr dim=2
 #pragma HLS resource variable=locall core=RAM_1P
 #pragma HLS resource variable=localr core=RAM_1P
+#pragma HLS ARRAY_RESHAPE variable=locall dim=2
+#pragma HLS ARRAY_RESHAPE variable=localr dim=2
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
 		for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2+=PARALLEL_DEGREE) {
             tensor_cont_mid_load(
@@ -220,7 +224,7 @@ void tensor_cont_last(
     cout << array_weight_size_1 << ");" << endl;
     #endif 
     //TYPE_INTER res;
-    TYPE_DATA local[32][16];
+    TYPE_DATA local[14336][16];
 #pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
 #pragma HLS resource variable=local core=RAM_1P
     for (int i_in_0 = 0; i_in_0 < array_in_size_0; i_in_0++) {
