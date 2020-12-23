@@ -172,34 +172,34 @@ void mnist_train_sync(
 #pragma HLS ARRAY_RESHAPE variable=array cyclic factor=16 dim=1
     const int num_class = 16;
     for (int i_sample = 0; i_sample < 100; i_sample++) {
-    	tensor_cont_last(array, weight, i_sample * IS, 16465040, 76800, 56, 1, 16, 256, shift);
-    	tensor_cont_mid(array, weight, 16465040, 8273040, 51200, 28, 32, 16, 32, 1, shift);
+//    	tensor_cont_last(array, weight, i_sample * IS, 16465040, 76800, 56, 1, 16, 256, shift);
+//    	tensor_cont_mid(array, weight, 16465040, 8273040, 51200, 28, 32, 16, 32, 1, shift);
     	tensor_cont_mid(array, weight, 8273040, 81040, 25600, 7, 64, 32, 64, 1, shift);
-    	tensor_cont_mid(array, weight, 81040, 80000, 0, 1, 112, 128, 4, 1, shift);
+//    	tensor_cont_mid(array, weight, 81040, 80000, 0, 1, 112, 128, 4, 1, shift);
     	relu_inplace(array, 80000, 512);
-    	tensor_cont_last(array, weight, 80000, 81040, 153600, 32, 1, 16, 256, shift);
-    	tensor_cont_mid(array, weight, 81040, 78400, 128000, 1, 512, 16, 1, 1, shift);
+//    	tensor_cont_last(array, weight, 80000, 81040, 153600, 32, 1, 16, 256, shift);
+//    	tensor_cont_mid(array, weight, 81040, 78400, 128000, 1, 512, 16, 1, 1, shift);
     	softmax_ce_grad(array, label[i_sample], 78400, 80512, num_class);
-    	tensor_cont_mid(array, weight, 80512, 81040, 128000, 1, 1, 16, 1, 512, shift);
-    	tensor_cont_last(array, weight, 81040, 80528, 179200, 32, 16, 16, 16, shift);
-    	tensor_cont_head_backward(array, weight_grad, 81040, 80000, 153600, 32, 256, 16, shift);
-    	tensor_cont_last(array, weight, 80000, 81040, 153600, 32, 1, 16, 256, shift);
-    	tensor_cont_end_backward(array, weight_grad, 81040, 80512, 128000, 1, 1, 512, 16, 1, shift);
+//    	tensor_cont_mid(array, weight, 80512, 81040, 128000, 1, 1, 16, 1, 512, shift);
+//    	tensor_cont_last(array, weight, 81040, 80528, 179200, 32, 16, 16, 16, shift);
+//    	tensor_cont_head_backward(array, weight_grad, 81040, 80000, 153600, 32, 256, 16, shift);
+//    	tensor_cont_last(array, weight, 80000, 81040, 153600, 32, 1, 16, 256, shift);
+//    	tensor_cont_end_backward(array, weight_grad, 81040, 80512, 128000, 1, 1, 512, 16, 1, shift);
     	relu_backward_inplace(array, 80000, 80528, 512);
-    	tensor_cont_mid(array, weight, 80528, 81040, 0, 1, 4, 128, 1, 112, shift);
-    	tensor_cont_mid(array, weight, 81040, 8273040, 25600, 7, 64, 32, 1, 64, shift);
-    	tensor_cont_mid(array, weight, 8273040, 16465040, 51200, 28, 32, 16, 1, 32, shift);
-    	tensor_cont_last(array, weight, 16465040, 24657040, 102400, 56, 16, 16, 16, shift);
+//    	tensor_cont_mid(array, weight, 80528, 81040, 0, 1, 4, 128, 1, 112, shift);
+//    	tensor_cont_mid(array, weight, 81040, 8273040, 25600, 7, 64, 32, 1, 64, shift);
+//    	tensor_cont_mid(array, weight, 8273040, 16465040, 51200, 28, 32, 16, 1, 32, shift);
+//    	tensor_cont_last(array, weight, 16465040, 24657040, 102400, 56, 16, 16, 16, shift);
     	tensor_cont_head_backward(array, weight_grad, 16465040, 0, 76800, 56, 256, 16, shift);
-    	tensor_cont_last(array, weight, 8273040, 16465040, 102400, 896, 1, 16, 256, shift);
-    	tensor_cont_end_backward(array, weight_grad, 16465040, i_sample * IS, 51200, 28, 32, 16, 16, 2, shift);
-    	tensor_cont_mid(array, weight, 81040, 8273040, 51200, 448, 2, 16, 16, 32, shift);
+//    	tensor_cont_last(array, weight, 8273040, 16465040, 102400, 896, 1, 16, 256, shift);
+//    	tensor_cont_end_backward(array, weight_grad, 16465040, i_sample * IS, 51200, 28, 32, 16, 16, 2, shift);
+//    	tensor_cont_mid(array, weight, 81040, 8273040, 51200, 448, 2, 16, 16, 32, shift);
     	tensor_cont_last(array, weight, 8273040, 16465040, 102400, 14336, 16, 16, 16, shift);
     	tensor_cont_end_backward(array, weight_grad, 16465040, i_sample * IS, 25600, 7, 64, 16, 32, 4, shift);
-    	tensor_cont_last(array, weight, i_sample * IS, 16465040, 76800, 56, 1, 16, 256, shift);
-    	tensor_cont_mid(array, weight, 16465040, 8273040, 51200, 28, 32, 16, 32, 1, shift);
-    	tensor_cont_mid(array, weight, 8273040, 81040, 25600, 7, 64, 32, 64, 1, shift);
-    	tensor_cont_end_backward(array, weight_grad, 81040, 80528, 0, 1, 1, 112, 128, 4, shift);
+//    	tensor_cont_last(array, weight, i_sample * IS, 16465040, 76800, 56, 1, 16, 256, shift);
+//    	tensor_cont_mid(array, weight, 16465040, 8273040, 51200, 28, 32, 16, 32, 1, shift);
+//    	tensor_cont_mid(array, weight, 8273040, 81040, 25600, 7, 64, 32, 64, 1, shift);
+//    	tensor_cont_end_backward(array, weight_grad, 81040, 80528, 0, 1, 1, 112, 128, 4, shift);
 
         for (int i = 0; i < 512; i++) {
             bias_grad[i] += array[HO + HS + OS + i];

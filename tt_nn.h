@@ -21,7 +21,7 @@ typedef float TYPE_PARA;
 typedef float TYPE_WEIGHT_BUFF;
 #endif
 
-#define PARALLEL_DEGREE 8
+#define PARALLEL_DEGREE 16
 
 void tensor_cont_mid(
     TYPE_DATA array[1073741824],

@@ -197,8 +197,10 @@ void tensor_cont_last_load(
 ){
 #pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
 #pragma HLS resource variable=local core=RAM_1P
-    for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
-        for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+	for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
+		//for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+		{
+			int i_in_2 = 0;
             int ind_in = sub2ind3(i_in_0, i_in_1, i_in_2,  array_in_size_1, array_in_size_2);
             for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
@@ -223,17 +225,17 @@ void tensor_cont_last_compute(
     TYPE_DATA local[14336][16],
     int i_in_0
 ){
-for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1++) {
+#pragma HLS DEPENDENCE array false
+	for (int i_w_1 = 0; i_w_1 < array_weight_size_1; i_w_1++) {
         TYPE_INTER res = 0;
         loop_in_1: for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
-            loop_in_2: for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
 #pragma HLS PIPELINE
-
+        	//loop_in_2: for (int i_in_2 = 0; i_in_2 < array_in_size_2; i_in_2 += PARALLEL_DEGREE) {
+        	{
+        		int i_in_2 = 0;
                 int ind_w = sub2ind3(i_in_1, i_w_1, i_in_2, array_weight_size_1, array_in_size_2);
                 for (int i_in_o = 0; i_in_o < PARALLEL_DEGREE; i_in_o++) {
 #pragma HLS UNROLL
-//                        res += array[(in_offset + ind_in) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
-//									 * weight[(weight_offset+ind_w) / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
                     res += local[i_in_1][i_in_2 / PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o]
                                 * weight[(weight_offset+ind_w)/ PARALLEL_DEGREE * PARALLEL_DEGREE + i_in_o];
                 }
@@ -267,9 +269,9 @@ void tensor_cont_last(
 #pragma HLS INTERFACE ap_memory depth=1048576 port=weight
 #pragma HLS ARRAY_RESHAPE variable=array cyclic factor=16
 #pragma HLS ARRAY_RESHAPE variable=weight cyclic factor=16
-#pragma HLS DEPENDENCE array inter false
+#pragma HLS DEPENDENCE array false
     #ifndef SYNTHESIS
-    assert (array_in_size_2 % PARALLEL_DEGREE == 0);
+    assert (array_in_size_2 == PARALLEL_DEGREE);
     cout << "tensor_cont_last(array, weight, ";
     #endif 
     //TYPE_INTER res;
