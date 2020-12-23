@@ -277,7 +277,8 @@ void tensor_cont_last(
     TYPE_DATA locall[14336][16];
     TYPE_DATA localr[14336][16];
 
-#pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
+#pragma HLS ARRAY_PARTITION variable=locall dim=2 factor=16
+#pragma HLS ARRAY_PARTITION variable=localr dim=2 factor=16
 #pragma HLS resource variable=locall core=RAM_1P
 #pragma HLS resource variable=localr core=RAM_1P
     tensor_cont_last_load(
@@ -459,7 +460,8 @@ void tensor_cont_end_backward(
     
     TYPE_DATA locall[32][128];
     TYPE_DATA localr[32][128];
-#pragma HLS ARRAY_PARTITION variable=local dim=2 factor=16
+#pragma HLS ARRAY_PARTITION variable=locall dim=2 factor=16
+#pragma HLS ARRAY_PARTITION variable=localr dim=2 factor=16
 #pragma HLS resource variable=locall core=RAM_1P
 #pragma HLS resource variable=localr core=RAM_1P
     for (int i_in_1 = 0; i_in_1 < array_in_size_1; i_in_1++) {
@@ -640,7 +642,8 @@ void tensor_cont_head_backward(
     TYPE_DATA localr[256];
 #pragma HLS ARRAY_RESHAPE variable=locall dim=1 factor=16
 #pragma HLS ARRAY_RESHAPE variable=localr dim=1 factor=16
-#pragma HLS resource variable=local core=RAM_1P
+#pragma HLS resource variable=locall core=RAM_1P
+#pragma HLS resource variable=localr core=RAM_1P
     tensor_cont_head_backward_load(
         array,
         grad_out,
