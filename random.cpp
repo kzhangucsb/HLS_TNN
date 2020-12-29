@@ -25,5 +25,10 @@ RINT_TYPE pseudo_random() {
 	return lfsr;
 }
 
-auto part = lfsr.range(3, 0);
+TYPE_INTER getrand(){
+	auto part = lfsr.range(3, 0);
+	ap_fixed<32, 11> tmp;
+	tmp.range(3, 0) = lfsr.range(3, 0);
+	return tmp;
+}
 #endif

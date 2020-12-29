@@ -4,9 +4,9 @@
 #include <hls_math.h>
 #define exp hls::exp
 #define TYPE_WEIGHT ap_fixed<4, 1>
-#define TYPE_DATA ap_fixed<8, 1>
+#define TYPE_DATA ap_fixed<16, 9>
 #define TYPE_GRAD ap_fixed<16, 9>
-#define TYPE_INTER ap_fixed<16, 1>
+#define TYPE_INTER ap_fixed<32, 11>
 #define TYPE_WEIGHT_BUFF ap_fixed<8, 1>
 #define TYPE_BUFFER ap_fixed<32, 1>
 #define TYPE_PARA ap_fixed<16, 0>
@@ -22,6 +22,7 @@ typedef float TYPE_WEIGHT_BUFF;
 #endif
 
 #define PARALLEL_DEGREE 16
+#define PARALLEL_DEGREE2 8
 
 void tensor_cont_mid(
     TYPE_DATA array[1073741824],
@@ -50,31 +51,31 @@ void tensor_cont_last(
 	int shift
 );
 
-void tensor_cont_end_backward(
-    TYPE_DATA array[1073741824],
-    TYPE_GRAD grad_out[1073741824],
-    int a1_offset,
-    int a2_offset,
-    int out_offset,
-    int array_in_size_0,
-    int array_in_size_1,
-    int array_in_size_2,
-    int array_in_size_3,
-    int array_weight_size_1,
-	int shift
-);
+//void tensor_cont_end_backward(
+//    TYPE_DATA array[1073741824],
+//    TYPE_GRAD grad_out[1073741824],
+//    int a1_offset,
+//    int a2_offset,
+//    int out_offset,
+//    int array_in_size_0,
+//    int array_in_size_1,
+//    int array_in_size_2,
+//    int array_in_size_3,
+//    int array_weight_size_1,
+//	int shift
+//);
 
-void tensor_cont_head_backward(
-    TYPE_DATA array[1073741824],
-    TYPE_GRAD grad_out[1073741824],
-    int a1_offset,
-    int a2_offset,
-    int out_offset,
-    int array_in_size_0,
-    int array_in_size_1,
-    int array_weight_size_1,
-	int shift
-);
+//void tensor_cont_head_backward(
+//    TYPE_DATA array[1073741824],
+//    TYPE_GRAD grad_out[1073741824],
+//    int a1_offset,
+//    int a2_offset,
+//    int out_offset,
+//    int array_in_size_0,
+//    int array_in_size_1,
+//    int array_weight_size_1,
+//	int shift
+//);
 
 void tensor_train_forward(
     TYPE_DATA array_list[1073741824],
