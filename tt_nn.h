@@ -10,6 +10,7 @@
 #define TYPE_WEIGHT_BUFF ap_fixed<8, 1>
 #define TYPE_BUFFER ap_fixed<32, 1>
 #define TYPE_PARA ap_fixed<16, 0>
+#define TYPE_RINT ap_uint<32>
 #else
 #include <math.h>
 typedef float TYPE_WEIGHT ;
@@ -26,6 +27,7 @@ typedef float TYPE_WEIGHT_BUFF;
 
 void tensor_cont_mid(
     TYPE_DATA array[1073741824],
+	TYPE_DATA array2[1073741824],
     TYPE_WEIGHT weight[1048576],
     int in_offset,
     int out_offset,
@@ -40,6 +42,7 @@ void tensor_cont_mid(
 
 void tensor_cont_last(
     TYPE_DATA array[1073741824],
+	TYPE_DATA array2[1073741824],
     TYPE_WEIGHT weight[1048576],
     int in_offset,
     int out_offset,
@@ -49,6 +52,20 @@ void tensor_cont_last(
     int array_in_size_2,
     int array_weight_size_1,
 	int shift
+);
+
+void tensor_cont_outer_prod(
+	const TYPE_DATA array1[1073741824],
+	TYPE_DATA array2[1073741824],
+	int data_in_offset,
+	int grad_out_offset,
+	int grad_wt_offset,
+	const int stride1[5],
+	const int stride2[5],
+	const int strideo[10],
+	const int shape1exp[5],
+	const int shape2exp[5],
+    int shift
 );
 
 //void tensor_cont_end_backward(
@@ -164,43 +181,47 @@ void softmax_ce_grad(
     unsigned char num_class
 );
 
-void adam_step(
-	TYPE_PARA beta1,
-	TYPE_PARA beta2
-);
 
-void adam(
-    TYPE_GRAD grad[1048576],
-    TYPE_BUFFER buffer1[1048576],
-	TYPE_BUFFER buffer2[1048576],
-    TYPE_WEIGHT weight[1048576],
-	TYPE_WEIGHT_BUFF weight_buffer[1048576],
-	int offset,
-    int shape,
-    TYPE_PARA lr,
-	TYPE_PARA beta1,
-	TYPE_PARA beta2,
-	TYPE_PARA eps
-);
+TYPE_RINT rand_step();
+TYPE_INTER getrand(int pos);
 
-void get_rank_para_update(
-	TYPE_WEIGHT_BUFF weight_buffer[1048576],
-	float rank_parameter[1048576],
-	int offset,
-	int num_rank,
-	int num_para_per_rank,
-	float em_stepsize
-);
-
-void add_bayes_grad(
-	TYPE_WEIGHT_BUFF weight_buffer[1048576],
-	TYPE_GRAD grad[1048576],
-	float rank_parameter[1048576],
-	TYPE_PARA scale,
-	int offset,
-	int num_rank,
-	int num_para_per_rank
-);
+//void adam_step(
+//	TYPE_PARA beta1,
+//	TYPE_PARA beta2
+//);
+//
+//void adam(
+//    TYPE_GRAD grad[1048576],
+//    TYPE_BUFFER buffer1[1048576],
+//	TYPE_BUFFER buffer2[1048576],
+//    TYPE_WEIGHT weight[1048576],
+//	TYPE_WEIGHT_BUFF weight_buffer[1048576],
+//	int offset,
+//    int shape,
+//    TYPE_PARA lr,
+//	TYPE_PARA beta1,
+//	TYPE_PARA beta2,
+//	TYPE_PARA eps
+//);
+//
+//void get_rank_para_update(
+//	TYPE_WEIGHT_BUFF weight_buffer[1048576],
+//	float rank_parameter[1048576],
+//	int offset,
+//	int num_rank,
+//	int num_para_per_rank,
+//	float em_stepsize
+//);
+//
+//void add_bayes_grad(
+//	TYPE_WEIGHT_BUFF weight_buffer[1048576],
+//	TYPE_GRAD grad[1048576],
+//	float rank_parameter[1048576],
+//	TYPE_PARA scale,
+//	int offset,
+//	int num_rank,
+//	int num_para_per_rank
+//);
 
 
 
